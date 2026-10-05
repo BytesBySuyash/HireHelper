@@ -2,20 +2,23 @@
 - [x] Inspect workspace, requirements and available tools
 - [x] Pin compatible workspace dependencies and install lockfile
 - [x] Compose, native startup, secure configuration and environment setup (execution pending)
-- [x] Prisma normalized schema, migration and development seed (DB application pending)
-- [x] Registration/login/OTP, limits, reset and opaque sessions (runtime audit pending)
-- [x] CSRF/origin protection, authorization and public/private DTOs (runtime audit pending)
-- [x] Profile/password/email change and sanitized uploads (runtime audit pending)
-- [x] Task CRUD/feed/search/pagination/owner views (runtime audit pending)
-- [x] Requests and transactional concurrent acceptance (PostgreSQL concurrency check pending)
-- [x] Assignment lifecycle/cancellation/notifications (runtime audit pending)
-- [x] Authenticated SSE and reconnect reconciliation (runtime audit pending)
-- [x] Angular authentication screens and responsive app shell (browser audit pending)
-- [x] Angular task/feed/detail/request/assignment screens (browser audit pending)
-- [x] Angular settings, uploads, notifications and errors (browser audit pending)
+- [x] Prisma schema, both migrations applied, opt-in idempotent seed
+- [x] Registration/login/OTP/limits/reset/opaque sessions and real auth edge tests
+- [x] CSRF/origin protection, authorization and public/private DTOs
+- [x] Profile/password/email change, sanitized uploads and upload cleanup
+- [x] Task CRUD/feed/search/pagination/owner views and stale expiry tests
+- [x] Requests and concurrent acceptance (one assignment, competing HTTP 409)
+- [x] Assignment lifecycle/cancellation/notifications and integration tests
+- [x] Authenticated SSE and real offline reconnect reconciliation
+- [x] Angular authentication and responsive/collapsible app shell
+- [x] Angular task/feed/detail/request/assignment screens
+- [x] Angular settings, uploads, notifications, errors and account menu
 - [x] Unit tests, lint, typecheck and production builds
-- [ ] Real PostgreSQL/Mailpit integration and concurrency tests
-- [ ] Playwright acceptance flows, responsive checks, screenshots
-- [ ] Persistence/restart/Compose validation
-- [ ] README, architecture, ER/API/security/deployment/interview docs
-- [ ] Final acceptance audit and stable checkpoint
+- [x] Real PostgreSQL/Mailpit integration and concurrency tests
+- [x] Final Playwright affected rerun including task picture and session expiry (all five distinct scenarios passed)
+- [x] Native PostgreSQL and attached-media restart persistence
+- [ ] Docker Compose build/start/restart and fresh-volume acceptance (Docker absent)
+- [x] README, architecture, ER/API/security/deployment/interview docs
+- [x] Dependency security updates; npm audit zero known advisories
+- [x] Native acceptance audit and stable checkpoint
+- [ ] Final full acceptance signoff after Docker Compose validation

@@ -1,6 +1,43 @@
 {
-  "name":"@hirehelper/api", "version":"1.0.0", "private":true,
-  "scripts":{"dev":"node ../../scripts/dev-api.mjs", "build":"tsc -p tsconfig.json", "typecheck":"tsc --noEmit -p tsconfig.json", "start":"node dist/main.js", "db:generate":"prisma generate", "db:migrate":"prisma migrate deploy", "seed":"tsx prisma/seed.ts", "test":"tsx --test test/security.test.ts"},
-  "dependencies":{"@nestjs/common":"11.2.7","@nestjs/core":"11.2.7","@nestjs/platform-express":"11.2.7","@nestjs/swagger":"11.2.3","@prisma/client":"7.10.0","@prisma/adapter-pg":"7.10.0","prisma":"7.10.0","pg":"8.16.3","argon2":"0.44.0","class-transformer":"0.5.1","class-validator":"0.14.2","cookie-parser":"1.4.7","dotenv":"17.2.3","helmet":"8.1.0","multer":"2.0.2","nodemailer":"7.0.11","reflect-metadata":"0.2.2","rxjs":"7.8.2","sharp":"0.34.5"},
-  "devDependencies":{"@types/express":"5.0.5","@types/cookie-parser":"1.4.10","@types/multer":"2.0.0","@types/nodemailer":"7.0.4","@types/pg":"8.15.6"}
+  "name": "@hirehelper/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node ../../scripts/dev-api.mjs",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/main.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "test": "tsx --test test/security.test.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.7",
+    "@nestjs/core": "11.2.7",
+    "@nestjs/platform-express": "11.2.7",
+    "@nestjs/swagger": "11.4.7",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "argon2": "0.44.0",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.2",
+    "cookie-parser": "1.4.7",
+    "dotenv": "17.2.3",
+    "helmet": "8.1.0",
+    "multer": "2.4.0",
+    "nodemailer": "10.0.14",
+    "pg": "8.16.3",
+    "prisma": "7.10.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.5",
+    "@types/multer": "2.0.0",
+    "@types/nodemailer": "7.0.4",
+    "@types/pg": "8.15.6"
+  }
 }

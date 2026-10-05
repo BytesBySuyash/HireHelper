@@ -19,12 +19,29 @@
     "db:generate": "npm run db:generate -w apps/api",
     "db:migrate": "npm run db:migrate -w apps/api",
     "seed": "npm run seed -w apps/api",
-    "test": "npm run test -w apps/api"
+    "test": "npm run test -w apps/api",
+    "test:e2e": "playwright test"
+  },
+  "overrides": {
+    "@nestjs/swagger": {
+      "js-yaml": "5.4.2"
+    },
+    "piscina": "5.3.2",
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.5",
+    "multer": "2.4.0",
+    "js-yaml": "5.4.2",
+    "lodash": "4.18.1",
+    "path-to-regexp": "8.4.2"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
     "@types/node": "24.10.1",
+    "@types/pg": "8.15.6",
     "eslint": "9.39.1",
+    "pg": "8.16.3",
+    "prettier": "3.6.2",
+    "sharp": "0.35.5",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
     "typescript-eslint": "8.48.1"

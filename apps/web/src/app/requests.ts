@@ -1,15 +1,164 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { Api, Auth, errorMessage, HelpRequest, Page } from './core';
-@Component({standalone:true,imports:[RouterLink,MatButtonModule],template:`<div class="page-heading"><div><span class="eyebrow">GOOD THINGS START WITH A CONNECTION</span><h1>{{received?'Requests received':'My Requests'}}</h1><p class="muted">{{received?'People offering to help with your tasks.':'Your offers to help, including tasks assigned to you.'}}</p></div></div>@if(!received){<div class="tabs"><button mat-button [class.selected]="!assignedOnly()" (click)="assignedOnly.set(false)">All my requests</button><button mat-button [class.selected]="assignedOnly()" (click)="assignedOnly.set(true)">Assigned to me</button></div>}@if(error()){<p class="error" role="alert">{{error()}}<button mat-button (click)="load()">Retry</button></p>}
-@if(loading()){<div class="skeleton" aria-busy="true"></div>}@else{<section class="request-list">@for(r of visible();track r.id){<article class="request-card"><div class="avatar">{{r.requester.firstName.charAt(0)}}</div><div class="request-copy"><span class="eyebrow">{{received?r.requester.firstName+' '+r.requester.lastName:'Your offer to help'}}</span><h3><a [routerLink]="'/tasks/'+r.task.id">{{r.task.title}}</a></h3><p class="muted">{{r.task.location}} · Task {{r.task.status.replaceAll('_',' ').toLowerCase()}}</p>@if(r.message){<p>{{r.message}}</p>}<span class="status">{{r.status}}</span></div><div class="request-actions">@if(r.status==='PENDING'){ @if(received){<button mat-flat-button [disabled]="busy()" (click)="action(r,'accept')">Accept</button><button mat-button [disabled]="busy()" (click)="action(r,'reject')">Reject</button>}@else{<button mat-button [disabled]="busy()" (click)="action(r,'withdraw')">Withdraw</button>}}<a mat-button [routerLink]="'/tasks/'+r.task.id">View task</a></div></article>}@empty{<div class="empty"><span>↗</span><h3>{{received?'No requests received yet':assignedOnly()?'No work assigned yet':'No requests sent yet'}}</h3><p>{{received?'Requests will appear when someone offers to help.':'Explore the feed and offer a helping hand.'}}</p><a mat-button routerLink="/feed">Explore feed</a></div>}</section>}
-<div class="pagination"><button mat-button [disabled]="page===1||loading()" (click)="page=page-1;load()">← Previous</button><span>Page {{page}}</span><button mat-button [disabled]="page*12>=data().total||loading()" (click)="page=page+1;load()">Next →</button></div>`})
+@Component({
+  standalone: true,
+  imports: [RouterLink, MatButtonModule],
+  template: `<div class="page-heading">
+      <div>
+        <span class="eyebrow">GOOD THINGS START WITH A CONNECTION</span>
+        <h1>{{ received ? 'Requests received' : 'My Requests' }}</h1>
+        <p class="muted">
+          {{
+            received
+              ? 'People offering to help with your tasks.'
+              : 'Your offers to help, including tasks assigned to you.'
+          }}
+        </p>
+      </div>
+    </div>
+    @if (!received) {
+      <div class="tabs">
+        <button mat-button [class.selected]="!assignedOnly()" (click)="assignedOnly.set(false)">
+          All my requests</button
+        ><button mat-button [class.selected]="assignedOnly()" (click)="assignedOnly.set(true)">
+          Assigned to me
+        </button>
+      </div>
+    }
+    @if (error()) {
+      <p class="error" role="alert">
+        {{ error() }}<button mat-button (click)="load()">Retry</button>
+      </p>
+    }
+    @if (loading()) {
+      <div class="skeleton" aria-busy="true"></div>
+    } @else {
+      <section class="request-list">
+        @for (r of visible(); track r.id) {
+          <article class="request-card">
+            <div class="avatar">{{ r.requester.firstName.charAt(0) }}</div>
+            <div class="request-copy">
+              <span class="eyebrow">{{
+                received ? r.requester.firstName + ' ' + r.requester.lastName : 'Your offer to help'
+              }}</span>
+              <h3>
+                <a [routerLink]="'/tasks/' + r.task.id">{{ r.task.title }}</a>
+              </h3>
+              <p class="muted">
+                {{ r.task.location }} · Task {{ r.task.status.replaceAll('_', ' ').toLowerCase() }}
+              </p>
+              @if (r.message) {
+                <p>{{ r.message }}</p>
+              }
+              <span class="status">{{ r.status }}</span>
+            </div>
+            <div class="request-actions">
+              @if (r.status === 'PENDING') {
+                @if (received) {
+                  <button mat-flat-button [disabled]="busy()" (click)="action(r, 'accept')">
+                    Accept</button
+                  ><button mat-button [disabled]="busy()" (click)="action(r, 'reject')">
+                    Reject
+                  </button>
+                } @else {
+                  <button mat-button [disabled]="busy()" (click)="action(r, 'withdraw')">
+                    Withdraw
+                  </button>
+                }
+              }
+              <a mat-button [routerLink]="'/tasks/' + r.task.id">View task</a>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty">
+            <span>↗</span>
+            <h3>
+              {{
+                received
+                  ? 'No requests received yet'
+                  : assignedOnly()
+                    ? 'No work assigned yet'
+                    : 'No requests sent yet'
+              }}
+            </h3>
+            <p>
+              {{
+                received
+                  ? 'Requests will appear when someone offers to help.'
+                  : 'Explore the feed and offer a helping hand.'
+              }}
+            </p>
+            <a mat-button routerLink="/feed">Explore feed</a>
+          </div>
+        }
+      </section>
+    }
+    <div class="pagination">
+      <button mat-button [disabled]="page === 1 || loading()" (click)="page = page - 1; load()">
+        ← Previous</button
+      ><span>Page {{ page }}</span
+      ><button
+        mat-button
+        [disabled]="page * 12 >= data().total || loading()"
+        (click)="page = page + 1; load()"
+      >
+        Next →
+      </button>
+    </div>`,
+})
 export class RequestsPage {
-  api=inject(Api);auth=inject(Auth);received=inject(Router).url==='/requests';data=signal<Page<HelpRequest>>({items:[],total:0,page:1,limit:12});assignedOnly=signal(false);error=signal('');loading=signal(true);busy=signal(false);page=1;
-  visible=()=>this.data().items.filter(r=>!this.assignedOnly() || r.status==='ACCEPTED');
-  constructor(){this.auth.refresh.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>void this.load());void this.load();}
-  async load(){this.loading.set(true);try{this.data.set(await this.api.get<Page<HelpRequest>>(`requests/${this.received?'received':'sent'}?page=${this.page}`));}catch(e){this.error.set(errorMessage(e));}finally{this.loading.set(false);}}
-  async action(r:HelpRequest,action:string){if(action==='accept' && !confirm('Select this helper? All other pending requests will be rejected.'))return;this.busy.set(true);this.error.set('');try{await this.api.post(`requests/${r.id}/${action}`);await this.load();}catch(e){this.error.set(errorMessage(e));}finally{this.busy.set(false);}}
+  api = inject(Api);
+  auth = inject(Auth);
+  received = inject(Router).url === '/requests';
+  data = signal<Page<HelpRequest>>({ items: [], total: 0, page: 1, limit: 12 });
+  assignedOnly = signal(false);
+  error = signal('');
+  loading = signal(true);
+  busy = signal(false);
+  page = 1;
+  visible = () => this.data().items.filter((r) => !this.assignedOnly() || r.status === 'ACCEPTED');
+  constructor() {
+    this.auth.refresh
+      .pipe(takeUntilDestroyed(inject(DestroyRef)))
+      .subscribe(() => void this.load());
+    effect(() => {
+      this.assignedOnly();
+      this.page = 1;
+      void this.load();
+    });
+  }
+  async load() {
+    this.loading.set(true);
+    try {
+      this.data.set(
+        await this.api.get<Page<HelpRequest>>(
+          `requests/${this.received ? 'received' : 'sent'}?page=${this.page}&assigned=${this.assignedOnly()}`,
+        ),
+      );
+    } catch (e) {
+      this.error.set(errorMessage(e));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+  async action(r: HelpRequest, action: string) {
+    if (
+      action === 'accept' &&
+      !confirm('Select this helper? All other pending requests will be rejected.')
+    )
+      return;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      await this.api.post(`requests/${r.id}/${action}`);
+      await this.load();
+    } catch (e) {
+      this.error.set(errorMessage(e));
+    } finally {
+      this.busy.set(false);
+    }
+  }
 }

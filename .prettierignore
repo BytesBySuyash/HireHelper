@@ -1,0 +1,10 @@
+node_modules
+.tools
+.git
+**/.angular
+**/dist
+package-lock.json
+docs/REQUIREMENTS.md
+docs/RECOVERY_PROTOCOL.txt
+test-results
+uploads

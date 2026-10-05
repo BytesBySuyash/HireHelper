@@ -89,6 +89,8 @@ Page defaults 1/12; maximum size 50, page 10000. Inputs use class-validator; unk
 
 ## Security choices
 
+Dependency audit patches: mail/image/upload/Swagger packages updated to patched releases. Root overrides pin patched transitive Piscina, deepmerge-ts, mysql2 (Prisma CLI dependency), YAML, lodash and path-to-regexp. These overrides preserve Angular 21 and Prisma 7 majors; schema generation, builds and integration checks verify compatibility. Review/remove overrides when upstream packages incorporate fixes. An npm audit snapshot is a known-advisory check, not a guarantee of absence of vulnerabilities.
+
 - Argon2id passwords; minimum 12/max 128 characters. Cryptographic six-digit OTPs hashed with a separate HMAC key bound to challenge/purpose/user. Five-minute expiration, five verification attempts, 60-second resend, database-backed IP/account limits. Atomic locked one-time consumption.
 - Seven-day opaque random sessions, stored only as keyed hashes; HttpOnly SameSite=Lax cookie, Secure under HTTPS. Session rotation after successful verification. Reset grants a ten-minute single-use password-reset authorization and never a login session. Reset/password changes revoke sessions and outstanding challenges.
 - Signed double-submit CSRF token plus exact origin validation on all mutations, including authentication. Backend guards authorize every private operation. Angular guards assist navigation only.

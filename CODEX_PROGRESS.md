@@ -1,56 +1,76 @@
 # HireHelper recovery checkpoint
 
 ## Goal and original requirements
-Implement the portfolio marketplace specified in docs/REQUIREMENTS.md. Angular standalone/Material web, NestJS REST API, PostgreSQL/Prisma, Mailpit OTP, local uploads, cookie sessions and authenticated SSE. No payments or external accounts. One helper per task with transactional assignment. Preserve all security, accessibility and testing requirements from the supplied build prompt.
+Build the complete independent portfolio marketplace in docs/REQUIREMENTS.md under the user's docs/RECOVERY_PROTOCOL.txt protocol. Angular standalone/Material frontend, NestJS REST backend, PostgreSQL/Prisma, Mailpit OTP email, opaque cookie sessions, CSRF, persistent sanitized images and authenticated SSE. One helper per task. No payments, chat, maps, AI APIs, hosted-service requirement or Infosys endorsement. Full original requirements are preserved, not replaced by this summary.
 
-## Architecture and stack
-npm workspaces apps/web and apps/api. Same-origin /api reverse proxy. Node 24, Angular 21 LTS with TypeScript 5.9, NestJS 11, Prisma 7 PostgreSQL driver adapter. Exact dependencies recorded in package manifests and lockfile once installed. Version references: https://angular.dev/reference/versions and https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7.
+## Architecture and technology
+npm workspaces apps/web and apps/api; same-origin /api development proxy and Nginx. Angular core 21.2.25, CLI/build 21.2.24, Material/CDK 21.2.14; TypeScript 5.9.3; Node 24.15.0; NestJS 11.2.7; Prisma/client/adapter-pg 7.10.0, PostgreSQL 17.6; Mailpit 1.27.8. Exact dependencies/overrides and lockfile are committed. Compatible Angular 21 LTS/TS5.9/Node24 selected from angular.dev/reference/versions; Prisma 7 uses prisma.config.ts + PostgreSQL adapter. Patched Swagger 11.4.7, multer 2.4.0, nodemailer 10.0.14, sharp 0.35.5. Targeted transitive security overrides documented in docs/ARCHITECTURE.md. Test dependencies explicit at root; avoid incidental npm hoisting.
 
 ## Completed milestones
-- Read pasted user protocol and attached specification. Empty repository confirmed. No AGENTS.md found in workspace or D drive root. Git initialized.
+1. Inspected empty repository and supplied files; no AGENTS.md in workspace/D root. Git initialized; requirements and protocol preserved.
+2. Pinned/installable workspaces and lockfile, configuration validation, secure idempotent setup, Compose/Dockerfiles/native dev scripts.
+3. Normalized UUID Prisma schema and two migrations: initial tables, then timestamptz conversion. Both applied to real isolated PostgreSQL. Opt-in idempotent fictional seed tested twice and expanded to 30 tasks.
+4. Registration/login/OTP/reset/email/password/profile, sessions and security guards.
+5. Task CRUD/feed/detail/request/assignment lifecycle; transactional acceptance/cancellation with notifications.
+6. Sanitized image upload/download, upload ownership, avatar updates, persisted notifications/SSE/cleanup.
+7. Angular lazy auth/shell/feed/task form/detail/requests/settings, dashboard counts, mobile drawer/desktop collapse, account menu, validation/skeletons/errors/confirmations/local asset.
+8. Real PostgreSQL/Mailpit/Chromium testing and captured screenshots at 360/768/1440; native restart persistence.
+9. README, architecture/ER/lifecycle/API/security/deployment/interview/resume documentation.
 
 ## Current milestone
-6: verification and documentation. Source implementations exist; runtime integration remains unverified.
+Final validation and recovery checkpoint. Native implementation validated; Docker Compose acceptance remains blocked by missing Docker.
 
-CURRENT TASK: Fix concurrent acceptance response discovered by real PostgreSQL tests; rerun API suite, extend auth edge tests and documentation.
-CURRENT FILES: apps/api/test, apps/api/prisma/migrations, scripts, docs, README.md.
-
-2026-10-05 additional runtime findings: concurrency fix passed the competing acceptance assertion (201/409) and lifecycle checks; next failure was media download because Express hides .tools test-upload parent directory. Explicit allow only on validated server-generated path fixes this. Auth edge test discovered native PostgreSQL timezone differs from UTC with timestamp-without-timezone schema; converting DateTime fields to PostgreSQL timestamptz and migrating existing UTC-intended values fixes server-side comparisons independently of DB timezone. Existing data preserved; no reset.
-NEXT STEP: Finish auth edge test with UTC database connections, seed verification, SSE reconnect/persistence tests, final builds/docs and checkpoint.
+CURRENT TASK: Save final source/tests/docs and accurately record remaining Docker acceptance.
+CURRENT FILES: CODEX_PROGRESS.md, TODO.md, docs/BUILD_PROGRESS.md, README.md.
+NEXT STEP: Confirm final build/audit and Git checkpoint; when Docker is available run the Compose acceptance path.
 
 ## Implementation ledger
-Files created: .gitignore, CODEX_PROGRESS.md, TODO.md. All subsequent files tracked by Git.
-Files modified: none previously existed.
-Database changes: normalized Prisma schema and SQL migration generation (not applied to a live DB).
-API endpoints implemented: auth/csrf/register/login/forgot/resend/verify/reset/me/profile/password/email/logout; dashboard; tasks CRUD/feed/mine; received/sent requests and accept/reject/withdraw; task cancel/start/complete-request/confirm/return; uploads/download; notifications list/unread/read/read-all/SSE; health/readiness; Swagger. All under /api/v1 except /api/docs.
-Frontend components implemented: lazy auth page, shell, task list, task form, detail, requests, settings; Api/Auth services and CSRF interceptor. Material SCSS responsive theme, local fallback SVG.
-Backend modules implemented: configuration, database, security guards, auth, tasks, media, events, notifications.
-Dependencies installed: npm install completed (766 packages). Lockfile exists. Ignored project-local Node 24.15.0 downloaded; system Node preserved. First install npm shim used Node 23 inadvertently; verification explicitly invokes Node 24 plus npm-cli.js.
-Required environment: DATABASE_URL, SESSION_SECRET, OTP_SECRET, APP_ORIGIN, SMTP_HOST/PORT/FROM, UPLOAD_DIR, NODE_ENV. Setup generates local secrets; never commit .env.
-Credentials still needed: no third-party keys for local development.
-Tests executed: npm run build (both apps), Prisma client generation, API type check, lint, first unit test attempt.
-Tests passed: both production builds; Prisma client generation; lint; both app typechecks; 4 security/unit checks (signed CSRF/origin, hash purpose binding, schedule validation, SSE isolation and logout completion). Migration SQL verified on disk.
-Tests failed (resolved): initial unit runner failed because top-level await in CommonJS; fixed and all 4 passed. Direct Prisma build/index.js is a non-CLI compatibility entry in this release; use npm exec workspace to invoke actual CLI. Sandbox Prisma engine failed EPERM; escalation allowed.
-Known limitations: host Node 23.11.0 is unsupported; Docker, psql and pg_ctl absent from PATH. Native services/container acceptance cannot run until runtime supplied. Registry access requires escalation; initial npm query failed ENOTCACHED under sandbox.
+Files created/modified: all project files are tracked by Git; use git show --stat and git ls-files. Major paths: apps/api/src/{auth,security,db,config,dto,tasks,media,events,notifications,main}.ts; apps/api/prisma/{schema.prisma,seed.ts,migrations}; apps/web/src/app/{core,auth-page,shell,task-list,task-form,task-detail,requests,settings}.ts; styles.scss, main.ts; compose*.yaml, Dockerfiles/nginx; scripts; tests; docs; root manifests/configuration. No unrelated pre-existing files existed.
+Database changes: User, OtpChallenge, Session, Task, TaskRequest, TaskAssignment, Notification, UploadedFile, RateLimit; UUID keys, FKs, enums, unique email/task-request/task-assignment constraints and indexes. All dates timestamptz(3). UTC connection options required for Prisma adapter parsing on non-UTC native DBs. Migrations preserve data; no development volume reset.
+API implemented: /api/v1/auth/csrf, register, login, forgot, resend, verify, reset, me, profile, password, email, logout; dashboard; tasks feed/mine/detail/CRUD and requests; received/sent request lists and accept/reject/withdraw; cancel/start/complete-request/confirm/return; files upload/download; notifications list/unread/read/read-all/events; health/readiness. Swagger /api/docs with DTO schemas.
+Frontend implemented: all six sidebar features and auth/reset/OTP/detail/edit/assigned work; Material controls and responsive original layout; typed clients, CSRF interceptor, session navigation, SSE reconnect reconciliation. Device timezone display; uploaded images and local SVG fallback.
+Important decisions: explicit task row locks with READ COMMITTED (not raw SERIALIZABLE errors); unique assignment as second integrity boundary. Notifications in same transaction, publish after commit. Single API SSE bus. Contact details only to assigned participants. Public sanitized attached avatars/task images; unattached media private. No cancellation after work starts/reassignment/resubmission.
+Dependencies installed: workspace lockfile and ignored project-local Node24/PostgreSQL/Mailpit/Chromium. System Node23 untouched.
+Required env: all variables explained in README/.env.example; setup generates ignored .env only if absent. Backend secrets never enter Angular. No third-party credentials needed locally.
 
-## Runtime testing milestone
-Downloaded ignored local PostgreSQL 17.6 runtime, Mailpit v1.27.8 and Chromium into .tools. Test DB port 55432, SMTP 51025, inbox 58025; test uploads .tools/test-uploads; no development data used. Applied migration successfully to hirehelper_test. Compiled API started via scripts/test-stack.mjs; Angular dev server on 4200. Real browser owner/helper lifecycle passed, as did unauthenticated/incorrect OTP/CSRF flow. Screenshots captured from running application at docs/screenshots/feed-{360,768,1440}.png.
-Concurrency test failed: competing acceptance yielded 500 under SERIALIZABLE raw SELECT lock (Prisma raw SQL error), while exactly one succeeded. Fix uses READ COMMITTED with explicit row lock for every task mutation plus unique assignment constraint; competing call observes state after lock release and returns 409. Rerun pending.
-Subsequent API suite passed concurrent acceptance (201/409 and exactly one DB assignment), lifecycle authorization, completion return/confirmation, cancellation propagation, withdrawal/duplicate, notification persistence/recipient scope, valid avatar upload/attach/public download, malicious SVG rejection, logout, reset authorization/revocation/single use. Native timestamps now timestamptz; Prisma PostgreSQL driver parsing also requires connection option `-c timezone=UTC` (added to API, seed, cleanup). Auth edge rerun pending. Source docs README/ARCHITECTURE/PORTFOLIO and isolated test scripts added. Upload cleanup shares row locks with attachment and never removes attached records.
-Generated Angular cache files were accidentally staged; removed from tracking and .angular added to .gitignore.
+## Tests actually executed and results
+- Prisma client generation: passed; both migrations applied and repeat deploy no-op passed.
+- npm run lint: passed; generated .angular caches excluded.
+- npm run typecheck: both apps passed.
+- npm run build: both production apps passed.
+- npm test: 4 unit/security tests passed (signed CSRF/origin, hash binding, schedule, SSE recipient isolation/logout cleanup).
+- Real API scenario: concurrency exactly one DB assignment with competing 409; ownership/state transitions/completion return/confirm/cancellation; request duplicates/withdrawal; notification persistence/unread/isolation; avatar/image ownership/sanitization; malicious SVG rejection; logout/reset revocation/single-use. Passed.
+- Real auth edge scenario: wrong/expired OTP, five attempts, resend 60s/invalidation, concurrent consume one winner, login OTP, email change and current-password change, account rate limits. Passed.
+- Seeded feed scenario: Mailpit demo login OTP, real nonempty pagination/search/location, own/closed/expired exclusion, stale expiry request rejection, invalid task ranges/fields, edit/delete. Passed.
+- Browser owner/helper scenario: registration via Mailpit, real task picture upload/download, offer/accept/start/return/complete, live notifications and offline reconnect reconciliation, 360/768/1440 no overflow/deep reload, expired-session redirect. Passed on affected rerun.
+- Browser pre-OTP/incorrect-code/CSRF scenario: passed.
+- Full five-scenario run initially passed auth/feed/pre-OTP and failed image fixture imports after dependency unhoisting. Root sharp/pg test dependencies declared; affected three-scenario rerun passed 3/3 (52.0 seconds). All five distinct scenarios have passing final results; do not claim the initially failed full run passed.
+- Native PostgreSQL user/task/notification counts and attached avatar bytes persisted after real PostgreSQL/Mailpit restart: passed.
+- npm audit: zero known advisories after patches/scoped overrides (snapshot; final recheck recorded in BUILD_PROGRESS).
+- Screenshots only from running application: docs/screenshots/feed-{360,768,1440}.png.
+Failures resolved: CommonJS top-level await; SSE data typing; wrong Prisma CLI entry; EPERM sandbox engine (escalated); raw serialization error mapped incorrectly; hidden test upload parent; native timestamp/driver timezone; SSE network failure wrongly treated as logout; generated-cache linting; image test dependency hoisting. Notification previews bounded to DB field length.
+Not executed: Docker Compose image build/start/fresh-volume/restart acceptance, HTTPS production or external SMTP deployment.
+
+## Runtime state and recovery commands
+Temporary native test services are stopped at handoff to free startup ports. Native test stack uses PostgreSQL 127.0.0.1:55432/hirehelper_test, Mailpit SMTP51025/inbox58025, API3000 and web4200. .tools/test-db and .tools/test-uploads preserve isolated data; .env development data untouched. Test secrets regenerate per API launch. API uses scripts/test-stack.mjs; web npm run dev:web. Optional local services script requires downloaded ignored binaries (documented in README); normal reproducible path uses compose.test.yaml.
+On this host npm.ps1 invokes unsupported system Node23. Use Node24 directly with npm CLI:
+  & '.\.tools\node_modules\node\bin\node.exe' 'D:\2.programming buddies\node js\node_modules\npm\bin\npm-cli.js' run build
+For native test-stack runner, set NPM_CLI_PATH to that npm CLI and prepend .tools/node_modules/node/bin to PATH. Prefer installing supported Node24 for normal usage.
 
 ## USER ACTION REQUIRED
-- Install/start Docker Desktop with Compose v2 and WSL2 on Windows to run PostgreSQL/Mailpit and complete service testing. Free for eligible personal use; see Docker licensing for other use. No API key. Development can continue without Docker; runtime checks cannot.
-- Install Node 24 LTS for native development. A project-local ignored runtime may be used for build verification without replacing system Node.
+- Docker Desktop/Compose v2 is not installed on this host. Obtain from official Docker Desktop Windows installation docs; enable/start WSL2 engine. Docker is free for eligible personal use (check current license for other use). No credential/env key needed. Native work/tests can continue without it; container acceptance cannot.
+- Native standard commands require Node24 LTS, available from nodejs.org at no cost. Install or use existing ignored local runtime. No private API key required.
+- Optional real SMTP only for real delivery: provider supplies host/port/TLS/user/password/app password/sender. Enter SMTP_* in backend ignored .env; costs vary. Local development fully works without it using Mailpit.
+- Production requires HTTPS APP_ORIGIN, COOKIE_SECURE=true, real SMTP and DEMO_SEED=false; never use demo credentials for real users.
 
-## Remaining tasks
-See TODO.md; none of the full acceptance criteria are claimed complete.
+## Known limitations and remaining tasks
+Docker acceptance is genuinely unverified, not a completed milestone. Single API instance SSE only, local file storage, no payments/chat/maps/reassignment, no cancellation after start, no request resubmission. See TODO.md for exact pending acceptance. No known failing native test remains after affected reruns. All secrets/generated directories remain ignored.
 
 ## RESUME POINT
-LAST COMPLETED TASK: API and Angular source implementations and successful production builds.
-CURRENT PROJECT STATE: Dependencies and local config installed; DB/service testing blocked by missing Docker. Source must still be runtime audited.
-CURRENTLY IMPLEMENTING: Migration/test runner verification and integration harness/docs.
-EXACT NEXT STEP: Inspect test/typecheck results and complete independent TODO items.
-NEXT FILE TO OPEN: apps/api/test/security.test.ts
-NEXT COMMAND TO RUN: git status --short
-REMAINING ISSUES: Docker/PostgreSQL/Mailpit unavailable; integration/Compose/browser acceptance unverified. Native dev runner changed to tsc to preserve Nest decorator metadata.
+LAST COMPLETED TASK: Native acceptance, patched dependencies, source/docs and persistent recovery ledger.
+CURRENT PROJECT STATE: Working built Angular/Nest/PostgreSQL/Mailpit application; native acceptance passed; Docker unavailable.
+CURRENTLY IMPLEMENTING: Final checkpoint only; next unfinished acceptance requires Docker.
+EXACT NEXT STEP: Inspect repo/progress/TODO/Git; verify Docker availability; run docker compose up --build -d and validate migration/readiness/login/task/image/SSE/deep-link/persistence using Compose services, without deleting existing volumes.
+NEXT FILE TO OPEN: TODO.md
+NEXT COMMAND TO RUN: docker compose version
+REMAINING ISSUES: Docker Compose path unexecuted; HTTPS/external SMTP production deployment intentionally not performed.
