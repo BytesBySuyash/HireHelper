@@ -2,7 +2,7 @@
 
 The project already has a Git repository and commit history. Publish the existing folder; no reinitialization or ZIP upload is needed.
 
-1. Open `D:\HireHelp` with VS Code's File > Open Folder.
+1. Open `D:\HireHelper` with VS Code's File > Open Folder.
 2. Open Source Control with Ctrl+Shift+G. Commit any changes you intentionally want to publish. Existing commits are already ready to push.
 3. Press Ctrl+Shift+P and run **Publish to GitHub**.
 4. Sign in to your intended GitHub account in the browser if requested.
