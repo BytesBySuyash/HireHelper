@@ -10,25 +10,25 @@ npm workspaces apps/web and apps/api. Same-origin /api reverse proxy. Node 24, A
 - Read pasted user protocol and attached specification. Empty repository confirmed. No AGENTS.md found in workspace or D drive root. Git initialized.
 
 ## Current milestone
-1: workspace, compatible versions, configuration, database.
+6: verification and documentation. Source implementations exist; runtime integration remains unverified.
 
-CURRENT TASK: Create workspace/configuration and normalized database schema.
-CURRENT FILES: package.json, apps/api, apps/web, scripts, compose.yaml, docs.
-NEXT STEP: Install pinned packages using supported local Node 24, validate schema and build.
+CURRENT TASK: Fix test runner and migration generation; add isolated acceptance tests and documentation.
+CURRENT FILES: apps/api/test, apps/api/prisma/migrations, scripts, docs, README.md.
+NEXT STEP: Inspect running validation command results; implement integration/browser harness.
 
 ## Implementation ledger
 Files created: .gitignore, CODEX_PROGRESS.md, TODO.md. All subsequent files tracked by Git.
 Files modified: none previously existed.
-Database changes: none applied yet.
-API endpoints completed: none yet.
-Frontend components completed: none yet.
-Backend modules completed: none yet.
-Dependencies installed: none yet.
+Database changes: normalized Prisma schema and SQL migration generation (not applied to a live DB).
+API endpoints implemented: auth/csrf/register/login/forgot/resend/verify/reset/me/profile/password/email/logout; dashboard; tasks CRUD/feed/mine; received/sent requests and accept/reject/withdraw; task cancel/start/complete-request/confirm/return; uploads/download; notifications list/unread/read/read-all/SSE; health/readiness; Swagger. All under /api/v1 except /api/docs.
+Frontend components implemented: lazy auth page, shell, task list, task form, detail, requests, settings; Api/Auth services and CSRF interceptor. Material SCSS responsive theme, local fallback SVG.
+Backend modules implemented: configuration, database, security guards, auth, tasks, media, events, notifications.
+Dependencies installed: npm install completed (766 packages). Lockfile exists. Ignored project-local Node 24.15.0 downloaded; system Node preserved. First install npm shim used Node 23 inadvertently; verification explicitly invokes Node 24 plus npm-cli.js.
 Required environment: DATABASE_URL, SESSION_SECRET, OTP_SECRET, APP_ORIGIN, SMTP_HOST/PORT/FROM, UPLOAD_DIR, NODE_ENV. Setup generates local secrets; never commit .env.
 Credentials still needed: no third-party keys for local development.
-Tests executed: tool availability/version inspection only.
-Tests passed: none yet.
-Tests failed: none yet.
+Tests executed: npm run build (both apps), Prisma client generation, API type check, lint, first unit test attempt.
+Tests passed: both production builds; Prisma client generation; lint; both app typechecks; 4 security/unit checks (signed CSRF/origin, hash purpose binding, schedule validation, SSE isolation and logout completion). Migration SQL verified on disk.
+Tests failed (resolved): initial unit runner failed because top-level await in CommonJS; fixed and all 4 passed. Direct Prisma build/index.js is a non-CLI compatibility entry in this release; use npm exec workspace to invoke actual CLI. Sandbox Prisma engine failed EPERM; escalation allowed.
 Known limitations: host Node 23.11.0 is unsupported; Docker, psql and pg_ctl absent from PATH. Native services/container acceptance cannot run until runtime supplied. Registry access requires escalation; initial npm query failed ENOTCACHED under sandbox.
 
 ## USER ACTION REQUIRED
@@ -39,10 +39,10 @@ Known limitations: host Node 23.11.0 is unsupported; Docker, psql and pg_ctl abs
 See TODO.md; none of the full acceptance criteria are claimed complete.
 
 ## RESUME POINT
-LAST COMPLETED TASK: Initial inspection and Git initialization.
-CURRENT PROJECT STATE: Empty workspace with recovery files.
-CURRENTLY IMPLEMENTING: Workspace/configuration/database.
-EXACT NEXT STEP: Read Git status and manifests, continue first unfinished TODO.
-NEXT FILE TO OPEN: TODO.md
+LAST COMPLETED TASK: API and Angular source implementations and successful production builds.
+CURRENT PROJECT STATE: Dependencies and local config installed; DB/service testing blocked by missing Docker. Source must still be runtime audited.
+CURRENTLY IMPLEMENTING: Migration/test runner verification and integration harness/docs.
+EXACT NEXT STEP: Inspect test/typecheck results and complete independent TODO items.
+NEXT FILE TO OPEN: apps/api/test/security.test.ts
 NEXT COMMAND TO RUN: git status --short
-REMAINING ISSUES: Docker unavailable; unsupported host Node.
+REMAINING ISSUES: Docker/PostgreSQL/Mailpit unavailable; integration/Compose/browser acceptance unverified. Native dev runner changed to tsc to preserve Nest decorator metadata.

@@ -1,19 +1,19 @@
 # HireHelper implementation checklist
 - [x] Inspect workspace, requirements and available tools
-- [~] Pin compatible workspace dependencies and install lockfile
-- [ ] Compose, native startup, secure configuration and environment setup
-- [ ] Prisma normalized schema, migration and development seed
-- [ ] Registration/login/OTP, limits, reset and opaque sessions
-- [ ] CSRF/origin protection, authorization and public/private DTOs
-- [ ] Profile/password/email change and sanitized uploads
-- [ ] Task CRUD/feed/search/pagination/owner views
-- [ ] Requests and transactional concurrent acceptance
-- [ ] Assignment lifecycle/cancellation/notifications
-- [ ] Authenticated SSE and reconnect reconciliation
-- [ ] Angular authentication screens and responsive app shell
-- [ ] Angular task/feed/detail/request/assignment screens
-- [ ] Angular settings, uploads, notifications and errors
-- [ ] Unit tests, lint, typecheck and production builds
+- [x] Pin compatible workspace dependencies and install lockfile
+- [x] Compose, native startup, secure configuration and environment setup (execution pending)
+- [x] Prisma normalized schema, migration and development seed (DB application pending)
+- [x] Registration/login/OTP, limits, reset and opaque sessions (runtime audit pending)
+- [x] CSRF/origin protection, authorization and public/private DTOs (runtime audit pending)
+- [x] Profile/password/email change and sanitized uploads (runtime audit pending)
+- [x] Task CRUD/feed/search/pagination/owner views (runtime audit pending)
+- [x] Requests and transactional concurrent acceptance (PostgreSQL concurrency check pending)
+- [x] Assignment lifecycle/cancellation/notifications (runtime audit pending)
+- [x] Authenticated SSE and reconnect reconciliation (runtime audit pending)
+- [x] Angular authentication screens and responsive app shell (browser audit pending)
+- [x] Angular task/feed/detail/request/assignment screens (browser audit pending)
+- [x] Angular settings, uploads, notifications and errors (browser audit pending)
+- [x] Unit tests, lint, typecheck and production builds
 - [ ] Real PostgreSQL/Mailpit integration and concurrency tests
 - [ ] Playwright acceptance flows, responsive checks, screenshots
 - [ ] Persistence/restart/Compose validation

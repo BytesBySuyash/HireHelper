@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+}
+enum TaskStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETION_PENDING
+  COMPLETED
+  CANCELLED
+}
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+enum AssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+enum OtpPurpose {
+  REGISTER
+  LOGIN
+  RESET
+  EMAIL_CHANGE
+}
+enum FileUse {
+  TASK
+  AVATAR
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  firstName String @db.VarChar(60)
+  lastName String @db.VarChar(60)
+  email String @unique @db.VarChar(254)
+  phone String? @db.VarChar(30)
+  passwordHash String
+  emailVerifiedAt DateTime?
+  avatarId String? @db.Uuid
+  avatar UploadedFile? @relation("Avatar", fields:[avatarId], references:[id], onDelete:SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks Task[]
+  requests TaskRequest[]
+  assignments TaskAssignment[]
+  sessions Session[]
+  challenges OtpChallenge[]
+  notifications Notification[]
+  files UploadedFile[] @relation("FileOwner")
+}
+model OtpChallenge {
+  id String @id @default(uuid()) @db.Uuid
+  userId String? @db.Uuid
+  user User? @relation(fields:[userId],references:[id],onDelete:Cascade)
+  purpose OtpPurpose
+  targetEmail String
+  codeHash String
+  expiresAt DateTime
+  attempts Int @default(0)
+  consumedAt DateTime?
+  sentAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  resetHash String? @unique
+  resetExpiresAt DateTime?
+  resetUsedAt DateTime?
+  @@index([userId,purpose,createdAt])
+  @@index([expiresAt])
+}
+model Session {
+  id String @id @default(uuid()) @db.Uuid
+  userId String @db.Uuid
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  tokenHash String @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([expiresAt])
+}
+model Task {
+  id String @id @default(uuid()) @db.Uuid
+  ownerId String @db.Uuid
+  owner User @relation(fields:[ownerId],references:[id],onDelete:Restrict)
+  title String @db.VarChar(100)
+  description String @db.VarChar(3000)
+  location String @db.VarChar(160)
+  startAt DateTime
+  endAt DateTime?
+  imageId String? @db.Uuid
+  image UploadedFile? @relation(fields:[imageId],references:[id],onDelete:SetNull)
+  status TaskStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requests TaskRequest[]
+  assignment TaskAssignment?
+  notifications Notification[]
+  @@index([status,startAt])
+  @@index([ownerId,createdAt])
+}
+model TaskRequest {
+  id String @id @default(uuid()) @db.Uuid
+  taskId String @db.Uuid
+  task Task @relation(fields:[taskId],references:[id],onDelete:Restrict)
+  requesterId String @db.Uuid
+  requester User @relation(fields:[requesterId],references:[id],onDelete:Restrict)
+  message String? @db.VarChar(1000)
+  status RequestStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assignment TaskAssignment?
+  notifications Notification[]
+  @@unique([taskId,requesterId])
+  @@index([requesterId,createdAt])
+}
+model TaskAssignment {
+  id String @id @default(uuid()) @db.Uuid
+  taskId String @unique @db.Uuid
+  task Task @relation(fields:[taskId],references:[id],onDelete:Restrict)
+  helperId String @db.Uuid
+  helper User @relation(fields:[helperId],references:[id],onDelete:Restrict)
+  acceptedRequestId String @unique @db.Uuid
+  acceptedRequest TaskRequest @relation(fields:[acceptedRequestId],references:[id],onDelete:Restrict)
+  status AssignmentStatus @default(ACTIVE)
+  assignedAt DateTime @default(now())
+  startedAt DateTime?
+  completionRequestedAt DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  returnReason String? @db.VarChar(1000)
+  @@index([helperId,status])
+}
+model Notification {
+  id String @id @default(uuid()) @db.Uuid
+  recipientId String @db.Uuid
+  recipient User @relation(fields:[recipientId],references:[id],onDelete:Cascade)
+  type String
+  body String @db.VarChar(1000)
+  taskId String? @db.Uuid
+  task Task? @relation(fields:[taskId],references:[id],onDelete:SetNull)
+  requestId String? @db.Uuid
+  request TaskRequest? @relation(fields:[requestId],references:[id],onDelete:SetNull)
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([recipientId,readAt,createdAt])
+}
+model UploadedFile {
+  id String @id @default(uuid()) @db.Uuid
+  ownerId String @db.Uuid
+  owner User @relation("FileOwner",fields:[ownerId],references:[id],onDelete:Cascade)
+  filename String @unique
+  mime String
+  size Int
+  use FileUse
+  createdAt DateTime @default(now())
+  tasks Task[]
+  avatars User[] @relation("Avatar")
+}
+model RateLimit {
+  key String @id
+  count Int @default(0)
+  expiresAt DateTime
+  @@index([expiresAt])
+}

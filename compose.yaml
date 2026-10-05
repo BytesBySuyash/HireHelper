@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hirehelper}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run npm run setup}
+      POSTGRES_DB: ${POSTGRES_DB:-hirehelper}
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27.8
+    ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+    environment:
+      MP_DATABASE: /data/mailpit.db
+    volumes: ["mail-data:/data"]
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-hirehelper}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-hirehelper}
+      SMTP_HOST: mailpit
+      UPLOAD_DIR: /data/uploads
+    ports: ["127.0.0.1:3000:3000"]
+    volumes: ["upload-data:/data/uploads"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports: ["127.0.0.1:4200:80"]
+    depends_on: [api]
+volumes:
+  postgres-data:
+  mail-data:
+  upload-data:
