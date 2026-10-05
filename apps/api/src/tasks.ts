@@ -12,7 +12,9 @@ export class Tasks {
   constructor(private db:Db,private events:Events){}
   async transaction<T>(fn:(tx:Tx)=>Promise<T>):Promise<T>{
     for(let attempt=0;attempt<3;attempt++){
-      try{const result=await this.db.$transaction(fn,{isolationLevel:'Serializable'});this.events.publish('*',{refresh:true});return result;}
+      // Task row locks serialize all mutations. READ COMMITTED lets a competing lock
+      // see the committed task state and return a domain 409 rather than a raw SQL error.
+      try{return await this.db.$transaction(fn,{isolationLevel:'ReadCommitted'});}
       catch(e){if(e instanceof Prisma.PrismaClientKnownRequestError){if(e.code==='P2034' && attempt<2)continue;if(['P2002','P2034'].includes(e.code))throw new ConflictException('This action conflicts with the current state. Refresh and try again.');}throw e;}
     }throw new ConflictException('Please retry.');
   }
@@ -22,7 +24,7 @@ export class Tasks {
     for(const n of notifications)this.events.publish(n.recipientId,{taskId,refresh:true});
   }
   async locked(tx:Tx,id:string){await tx.$queryRaw`SELECT "id" FROM "Task" WHERE "id"=${id}::uuid FOR UPDATE`;const task=await tx.task.findUnique({where:{id},include:{assignment:true,_count:{select:{requests:true}}}});if(!task)throw new NotFoundException('Task unavailable.');return task;}
-  async image(tx:Tx,imageId:string|undefined,ownerId:string){if(imageId && !await tx.uploadedFile.findFirst({where:{id:imageId,ownerId,use:'TASK'}}))throw new BadRequestException('Image unavailable.');}
+  async image(tx:Tx,imageId:string|undefined,ownerId:string){if(imageId){await tx.$queryRaw`SELECT "id" FROM "UploadedFile" WHERE "id"=${imageId}::uuid FOR UPDATE`;if(!await tx.uploadedFile.findFirst({where:{id:imageId,ownerId,use:'TASK'}}))throw new BadRequestException('Image unavailable.');}}
   schedule(dto:TaskDto){const startAt=new Date(dto.startAt),endAt=dto.endAt?new Date(dto.endAt):null;if(!/[zZ]|[+-]\d{2}:\d{2}$/.test(dto.startAt) || startAt<=new Date() || (endAt && endAt<=startAt))throw new BadRequestException('Use a future start time with timezone and an end time after start.');return {startAt,endAt};}
   async feed(userId:string,q:PageDto){
     const where:Prisma.TaskWhereInput={status:'OPEN',startAt:{gt:new Date()},ownerId:{not:userId},...(q.search?{OR:[{title:{contains:q.search,mode:'insensitive'}},{description:{contains:q.search,mode:'insensitive'}}]}:{}),...(q.location?{location:{contains:q.location,mode:'insensitive'}}:{})};

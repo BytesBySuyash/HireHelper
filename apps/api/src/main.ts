@@ -20,7 +20,7 @@ class Errors implements ExceptionFilter {
   catch(error:unknown,host:ArgumentsHost){let status=500,message:unknown='An unexpected error occurred.';
     if(error instanceof HttpException){status=error.getStatus();const body=error.getResponse();message=typeof body==='string'?body:(body as {message:unknown}).message;}
     if(error instanceof Prisma.PrismaClientKnownRequestError && ['P2002','P2034'].includes(error.code)){status=409;message='This action conflicts with existing data.';}
-    if(status===500)console.error(error instanceof Error?error.name:'Unknown error');
+    if(status===500)console.error(error instanceof Prisma.PrismaClientKnownRequestError?`Prisma error ${error.code}`:error instanceof Error?error.name:'Unknown error');
     host.switchToHttp().getResponse<Response>().status(status).json({error:{status,message}});
   }
 }

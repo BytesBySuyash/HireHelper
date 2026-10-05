@@ -40,11 +40,11 @@ model User {
   email String @unique @db.VarChar(254)
   phone String? @db.VarChar(30)
   passwordHash String
-  emailVerifiedAt DateTime?
+  emailVerifiedAt DateTime? @db.Timestamptz(3)
   avatarId String? @db.Uuid
   avatar UploadedFile? @relation("Avatar", fields:[avatarId], references:[id], onDelete:SetNull)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
   tasks Task[]
   requests TaskRequest[]
   assignments TaskAssignment[]
@@ -60,14 +60,14 @@ model OtpChallenge {
   purpose OtpPurpose
   targetEmail String
   codeHash String
-  expiresAt DateTime
+  expiresAt DateTime @db.Timestamptz(3)
   attempts Int @default(0)
-  consumedAt DateTime?
-  sentAt DateTime @default(now())
-  createdAt DateTime @default(now())
+  consumedAt DateTime? @db.Timestamptz(3)
+  sentAt DateTime @default(now()) @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
   resetHash String? @unique
-  resetExpiresAt DateTime?
-  resetUsedAt DateTime?
+  resetExpiresAt DateTime? @db.Timestamptz(3)
+  resetUsedAt DateTime? @db.Timestamptz(3)
   @@index([userId,purpose,createdAt])
   @@index([expiresAt])
 }
@@ -76,9 +76,9 @@ model Session {
   userId String @db.Uuid
   user User @relation(fields:[userId],references:[id],onDelete:Cascade)
   tokenHash String @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime @default(now())
+  expiresAt DateTime @db.Timestamptz(3)
+  revokedAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
   @@index([userId])
   @@index([expiresAt])
 }
@@ -89,13 +89,13 @@ model Task {
   title String @db.VarChar(100)
   description String @db.VarChar(3000)
   location String @db.VarChar(160)
-  startAt DateTime
-  endAt DateTime?
+  startAt DateTime @db.Timestamptz(3)
+  endAt DateTime? @db.Timestamptz(3)
   imageId String? @db.Uuid
   image UploadedFile? @relation(fields:[imageId],references:[id],onDelete:SetNull)
   status TaskStatus @default(OPEN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
   requests TaskRequest[]
   assignment TaskAssignment?
   notifications Notification[]
@@ -110,8 +110,8 @@ model TaskRequest {
   requester User @relation(fields:[requesterId],references:[id],onDelete:Restrict)
   message String? @db.VarChar(1000)
   status RequestStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
   assignment TaskAssignment?
   notifications Notification[]
   @@unique([taskId,requesterId])
@@ -126,11 +126,11 @@ model TaskAssignment {
   acceptedRequestId String @unique @db.Uuid
   acceptedRequest TaskRequest @relation(fields:[acceptedRequestId],references:[id],onDelete:Restrict)
   status AssignmentStatus @default(ACTIVE)
-  assignedAt DateTime @default(now())
-  startedAt DateTime?
-  completionRequestedAt DateTime?
-  completedAt DateTime?
-  cancelledAt DateTime?
+  assignedAt DateTime @default(now()) @db.Timestamptz(3)
+  startedAt DateTime? @db.Timestamptz(3)
+  completionRequestedAt DateTime? @db.Timestamptz(3)
+  completedAt DateTime? @db.Timestamptz(3)
+  cancelledAt DateTime? @db.Timestamptz(3)
   returnReason String? @db.VarChar(1000)
   @@index([helperId,status])
 }
@@ -144,8 +144,8 @@ model Notification {
   task Task? @relation(fields:[taskId],references:[id],onDelete:SetNull)
   requestId String? @db.Uuid
   request TaskRequest? @relation(fields:[requestId],references:[id],onDelete:SetNull)
-  readAt DateTime?
-  createdAt DateTime @default(now())
+  readAt DateTime? @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
   @@index([recipientId,readAt,createdAt])
 }
 model UploadedFile {
@@ -156,13 +156,14 @@ model UploadedFile {
   mime String
   size Int
   use FileUse
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
   tasks Task[]
   avatars User[] @relation("Avatar")
 }
 model RateLimit {
   key String @id
   count Int @default(0)
-  expiresAt DateTime
+  expiresAt DateTime @db.Timestamptz(3)
   @@index([expiresAt])
 }
+

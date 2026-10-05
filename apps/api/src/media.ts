@@ -26,6 +26,6 @@ export class MediaController {
     if(!file)throw new NotFoundException('Image unavailable.');
     // Attached sanitized task images and avatars are intentionally public. Unattached files require ownership.
     if(!file.tasks.length && !file.avatars.length){await new SessionGuard(this.db).canActivate({switchToHttp:()=>({getRequest:()=>r})} as any);if(file.ownerId!==r.identity!.id)throw new NotFoundException('Image unavailable.');}
-    res.setHeader('Content-Type','image/webp');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','private, max-age=300');res.sendFile(join(settings.uploads,file.filename));
+    res.setHeader('Content-Type','image/webp');res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Cache-Control','private, max-age=300');res.sendFile(join(settings.uploads,file.filename),{dotfiles:'allow'});
   }
 }

@@ -109,17 +109,20 @@ export class AuthService {
       if(!c || c.purpose!=='RESET' || !c.userId || !c.consumedAt || c.resetUsedAt || !c.resetExpiresAt || c.resetExpiresAt<=new Date())throw new BadRequestException('Reset authorization expired. Start again.');
       await tx.user.update({where:{id:c.userId},data:{passwordHash}});
       await tx.otpChallenge.update({where:{id:c.id},data:{resetUsedAt:new Date()}});
+      await tx.otpChallenge.updateMany({where:{userId:c.userId,consumedAt:null},data:{consumedAt:new Date()}});
       await tx.session.updateMany({where:{userId:c.userId},data:{revokedAt:new Date()}});
     });
     return {message:'Password reset. Sign in with your new password.'};
   }
   async profile(dto:ProfileDto,req:AuthRequest){
-    if(dto.avatarId && !await this.db.uploadedFile.findFirst({where:{id:dto.avatarId,ownerId:req.identity!.id,use:'AVATAR'}}))throw new BadRequestException('Avatar unavailable.');
-    return privateUser(await this.db.user.update({where:{id:req.identity!.id},data:dto}));
+    return this.db.$transaction(async tx=>{
+      if(dto.avatarId){await tx.$queryRaw`SELECT "id" FROM "UploadedFile" WHERE "id"=${dto.avatarId}::uuid FOR UPDATE`;if(!await tx.uploadedFile.findFirst({where:{id:dto.avatarId,ownerId:req.identity!.id,use:'AVATAR'}}))throw new BadRequestException('Avatar unavailable.');}
+      return privateUser(await tx.user.update({where:{id:req.identity!.id},data:dto}));
+    });
   }
   async password(dto:PasswordDto,req:AuthRequest,res:Response){
     if(!await argon2.verify(req.identity!.passwordHash,dto.currentPassword))throw new BadRequestException('Current password is incorrect.');
-    await this.db.$transaction([this.db.user.update({where:{id:req.identity!.id},data:{passwordHash:await argon2.hash(dto.password,{type:argon2.argon2id})}}),this.db.session.updateMany({where:{userId:req.identity!.id},data:{revokedAt:new Date()}})]);
+    await this.db.$transaction([this.db.user.update({where:{id:req.identity!.id},data:{passwordHash:await argon2.hash(dto.password,{type:argon2.argon2id})}}),this.db.session.updateMany({where:{userId:req.identity!.id},data:{revokedAt:new Date()}}),this.db.otpChallenge.updateMany({where:{userId:req.identity!.id,consumedAt:null},data:{consumedAt:new Date()}})]);
     cookie(res,'hh_session','',0);this.events.close(req.session!.id);return {message:'Password changed. Sign in again.'};
   }
   async changeEmail(dto:EmailChangeDto,req:AuthRequest){

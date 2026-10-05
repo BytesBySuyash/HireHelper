@@ -23,7 +23,7 @@ export class TaskDetail {
   api=inject(Api);auth=inject(Auth);router=inject(Router);id=inject(ActivatedRoute).snapshot.paramMap.get('id')!;task=signal<Task|null>(null);error=signal('');busy=signal(false);
   requestForm=inject(FormBuilder).nonNullable.group({message:['']});returnForm=inject(FormBuilder).nonNullable.group({reason:['',[Validators.required,Validators.minLength(3),Validators.maxLength(1000)]]});
   owner=()=>this.task()?.ownerId===this.auth.user()?.id;helper=()=>this.task()?.assignment?.helperId===this.auth.user()?.id;
-  constructor(){this.auth.refresh.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(()=>void this.load());void this.load();}
+  constructor(){const destroy=inject(DestroyRef);this.auth.refresh.pipe(takeUntilDestroyed(destroy)).subscribe(()=>void this.load());inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(params=>{this.id=params.get('id')!;this.task.set(null);void this.load();});}
   async load(){try{this.task.set(await this.api.get<Task>(`tasks/${this.id}`));}catch(e){this.error.set(errorMessage(e));}}
   async run(fn:()=>Promise<unknown>){this.busy.set(true);this.error.set('');try{await fn();await this.load();}catch(e){this.error.set(errorMessage(e));}finally{this.busy.set(false);}}
   request(){return this.run(()=>this.api.post(`tasks/${this.id}/requests`,this.requestForm.getRawValue()));}

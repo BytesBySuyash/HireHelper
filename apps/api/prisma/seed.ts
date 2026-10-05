@@ -5,7 +5,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import * as argon2 from 'argon2';
 config({path:'../../.env',quiet:true});
 if(process.env.NODE_ENV==='production' || process.env.DEMO_SEED!=='true')throw new Error('Development seeding requires DEMO_SEED=true and non-production NODE_ENV.');
-const db=new PrismaClient({adapter:new PrismaPg({connectionString:process.env.DATABASE_URL!})});
+const db=new PrismaClient({adapter:new PrismaPg({connectionString:process.env.DATABASE_URL!,options:'-c timezone=UTC'})});
 async function seed(){
 const passwordHash=await argon2.hash('Demo-Helper-2026!',{type:argon2.argon2id});
 try{

@@ -1,0 +1,11 @@
+import { existsSync, mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { spawn } from 'node:child_process';
+import EmbeddedPostgres from '../.tools/node_modules/embedded-postgres/dist/index.js';
+mkdirSync('.tools/test-db',{recursive:true});
+const pg=new EmbeddedPostgres({databaseDir:resolve('.tools/test-db'),user:'test',password:'test-only-password',port:55432,persistent:true,createPostgresUser:false,postgresFlags:['-h','127.0.0.1'],onLog:()=>{},onError:console.error});
+if(!existsSync('.tools/test-db/PG_VERSION'))await pg.initialise();
+await pg.start();const client=pg.getPgClient();await client.connect();const result=await client.query("SELECT 1 FROM pg_database WHERE datname='hirehelper_test'");await client.end();if(!result.rowCount)await pg.createDatabase('hirehelper_test');
+const mail=spawn(resolve('.tools/mailpit/mailpit.exe'),['--listen','127.0.0.1:58025','--smtp','127.0.0.1:51025'],{stdio:'inherit',windowsHide:true});
+console.log('Isolated PostgreSQL 17 and Mailpit ready on 55432 / 58025 / 51025.');
+let closing=false;async function stop(){if(closing)return;closing=true;mail.kill();await pg.stop();process.exit();}process.on('SIGINT',stop);process.on('SIGTERM',stop);
