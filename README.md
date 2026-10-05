@@ -4,6 +4,10 @@ An independently rebuilt Angular full-stack portfolio application: post a task, 
 
 Angular standalone components, lazy routes, Reactive Forms, HttpClient, RxJS and signals; Angular Material/SCSS; NestJS; PostgreSQL/Prisma migrations; Argon2id; Nodemailer/Mailpit; persistent local images; cookie-authenticated SSE. No external keys or accounts required locally.
 
+![HireHelper feed on desktop](docs/screenshots/feed-1440.png)
+
+Post tasks, offer help, select one helper and follow progress through owner-confirmed completion. Features include email OTP, searchable listings, image uploads, live notifications and profile settings. See the [architecture and database diagrams](docs/ARCHITECTURE.md), [mobile screenshot](docs/screenshots/feed-360.png), [contribution guide](CONTRIBUTING.md) and [VS Code publishing steps](docs/GITHUB_PUBLISHING.md).
+
 ## Start locally
 
 Prerequisites: Node 24 LTS (24.15+), npm, Git, Docker Desktop with Compose v2 (Windows: enable WSL2 engine), or Docker Engine/Compose v2 on Linux. Use Node 24 rather than Node 23. Exact pins are in package manifests and package-lock.json.
@@ -102,6 +106,8 @@ npm test
 docker compose -p hirehelper-tests -f compose.test.yaml up -d
 node scripts/test-stack.mjs
 ```
+
+GitHub Actions runs dependency installation, Prisma generation, lint, type checking, both production builds and unit/security checks on pushes to main and pull requests. The workflow is configured in `.github/workflows/ci.yml`; its first hosted execution requires publishing the repository. Browser/Docker acceptance remains a separate check described below.
 
 In separate terminals run `npm run dev:web`, then `npx playwright install chromium` and `npx playwright test`. The test stack uses `hirehelper_test` on 55432, Mailpit SMTP 51025/inbox 58025, and ignored `.tools/test-uploads`; invoking the test stack explicitly seeds fictional test fixtures. Stop the development API before launching the test API (both use 3000); stop development web if 4200 is busy. Test secrets are randomly generated per test API launch. Tests never obtain codes from production auth APIs; they read Mailpit's testing API. API acceptance tests manipulate expiry/cooldown fields only in the isolated test DB. Do not run tests against a production deployment.
 

@@ -26,3 +26,9 @@
 - [x] Dependency security updates; npm audit zero known advisories
 - [x] Native acceptance audit and stable checkpoint
 - [x] Final local acceptance signoff after native and Docker Compose validation
+
+## Portfolio repository
+- [x] README preview, contribution guide, runtime/editor configuration and CI workflow
+- [x] VSCode publishing guide and local lint/security checks
+- [ ] User publishes repository through intended GitHub account and verifies first hosted CI run
+- [ ] Owner chooses LICENSE; optional demo video/live deployment link
