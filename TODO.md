@@ -17,7 +17,10 @@
 - [x] Real PostgreSQL/Mailpit integration and concurrency tests
 - [x] Final Playwright affected rerun including task picture and session expiry (all five distinct scenarios passed)
 - [x] Native PostgreSQL and attached-media restart persistence
-- [ ] Docker Compose build/start/restart and fresh-volume acceptance (Docker absent)
+- [x] Finish WSL Windows installation and verify healthy Docker engine after restart
+- [ ] Optional global Node24 installation for native development (Compose includes Node24)
+- [x] Restore native preview and verify app/docs/readiness/inbox links return HTTP 200
+- [ ] Docker Compose build/start/restart and fresh-volume acceptance
 - [x] README, architecture, ER/API/security/deployment/interview docs
 - [x] Dependency security updates; npm audit zero known advisories
 - [x] Native acceptance audit and stable checkpoint

@@ -20,7 +20,11 @@ Open http://localhost:4200. OTP messages go to **http://localhost:8025**, the Ma
 
 Compose runs migrations before starting the API and preserves PostgreSQL, inbox and uploads in named volumes. Container services use `postgres` and `mailpit` hostnames. The web server proxies `/api` to the API and serves Angular deep links. Database, SMTP, inbox and API development ports bind to loopback. Defaults: web 4200, API 3000, DB 5432, SMTP 1025, inbox 8025.
 
-**Verification status:** source builds, strict type checks, lint and unit checks passed. Native real PostgreSQL/Mailpit and browser checks are recorded in [docs/BUILD_PROGRESS.md](docs/BUILD_PROGRESS.md). Docker is absent on the build host, so the Compose path has not yet been executed. Do not infer Docker acceptance from native test results.
+**Verification status:** source builds, strict type checks, lint and unit checks passed. Native real PostgreSQL/Mailpit and browser checks are recorded in [docs/BUILD_PROGRESS.md](docs/BUILD_PROGRESS.md). Docker Desktop and WSL are now installed and the engine is healthy. First Compose build/start validation is in progress; see CODEX_PROGRESS.md for the latest outcome.
+
+Windows helpers: run `powershell -ExecutionPolicy Bypass -File .\scripts\install-windows-prerequisites.ps1` from an administrator PowerShell to download verified official Node 24 and WSL installers and enable required Windows features. It never restarts Windows automatically. After restarting Windows and opening Docker Desktop, run `powershell -ExecutionPolicy Bypass -File .\scripts\start-windows.ps1`. This handles Docker's per-user install location even when Docker is absent from PATH. Both helper scripts currently have syntax validation only; administrator installation and Compose startup are pending.
+
+The optional native preview uses **http://localhost:4200** and the OTP inbox **http://localhost:58025**. Port 8025 is for Compose only. The native preview uses the preserved isolated test database, separate from `.env` and development volumes. Recheck services after changing accounts or restarting Windows; run either the native API/web or Compose to avoid port conflicts.
 
 ## Native development
 

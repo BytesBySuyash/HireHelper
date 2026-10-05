@@ -20,3 +20,12 @@ Dependency audit found 13 advisories (2 critical/11 high); direct packages patch
 Final validation: both app type checks and production builds passed on patched dependencies; final web build also passed after contrast refinement. Four unit checks passed. Full five-scenario run passed auth/feed/pre-OTP but failed image test fixture imports due to incidental hoisting; explicit root sharp/pg test dependencies fixed this. Affected three-scenario rerun passed 3/3 in 52.0 seconds: API concurrency/uploads/reset plus browser task picture/lifecycle/SSE offline reconnect/360-768-1440/deep reload/session expiry plus pre-OTP/CSRF. All five distinct scenarios have passing final results; the initially failed full run is not reported as passing.
 
 Docker Compose acceptance remains blocked: no Docker executable/engine installed. Native PostgreSQL restart persistence passed; Docker image builds/fresh-volume/start/restart/HTTPS production deployment are not verified. Temporary native test services are stopped at handoff; persisted .tools/test-db/test-uploads remain intact. Resume from CODEX_PROGRESS.md, never recreate the project.
+
+Link/prerequisite recovery: Docker found in per-user installation (CLI29.8.1/Composev5.5.1), not on PATH; WSL missing and approved engine info returns HTTP500. Native services restored and app/docs/readiness/inbox58025 return HTTP200. Node24.21 MSI complete with valid OpenJS signature; WSL3.0.1 download partial after reset, not installable. New PowerShell helper scripts syntax-parsed only. Browser smoke request rejected by approval-review usage limit and did not execute. System installs, Compose acceptance and new Git checkpoint remain pending. See NEW_CHAT_HANDOFF.md for new-account continuation.
+
+
+Docker startup error diagnosis: firmware virtualization and active Windows hypervisor verified. VirtualMachinePlatform and WSL optional feature were disabled, now enabled by admin repair with no automatic reboot. Windows restart pending. Official WSL installation downloading in background; outcome log .tools/docker-wsl-repair.log. Docker post-reboot acceptance pending.
+
+
+Post-restart verification: WSL3.0.1 installed, default docker-desktop WSL2 distro, Docker engine29.8.1 responds successfully; no reboot-pending marker. First Compose pull/build/start is executing, native test data and .env preserved. Container acceptance not yet completed.
+

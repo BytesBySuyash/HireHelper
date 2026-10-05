@@ -74,3 +74,26 @@ EXACT NEXT STEP: Inspect repo/progress/TODO/Git; verify Docker availability; run
 NEXT FILE TO OPEN: TODO.md
 NEXT COMMAND TO RUN: docker compose version
 REMAINING ISSUES: Docker Compose path unexecuted; HTTPS/external SMTP production deployment intentionally not performed.
+
+## 2026-10-05 prerequisite and link recovery
+CURRENT TASK: User requests working local links and PowerShell prerequisite installation. Docker installer found at D:\USER\Downloads\Docker Desktop Installer.exe; Docker executable absent; WSL reports not installed. Existing system Node23 unsupported; local Node24 available. App ports currently stopped. Next: verify installer, install WSL/Docker and supported Node, start services and probe URLs. Preserve existing databases and .env.
+
+
+## Latest recovery state (supersedes earlier runtime observations)
+Docker is installed in LOCALAPPDATA\Programs\DockerDesktop, CLI29.8.1/Composev5.5.1; absent from PATH. WSL missing; approved docker info returned engine HTTP500. Virtualization enabled, Windows26200, no administrator token. Native services restarted; final probes app4200/docs/readiness/inbox58025 all HTTP200. Compose inbox8025 remains offline. Native test data preserved.
+Official Node24.21 MSI downloaded complete, OpenJS signature valid, not installed. WSL3.0.1 MSI partial after connection reset (about45MB of350.6MB), invalid signature; do not install. New PowerShell installation/start helper scripts syntax-checked only. Automatic approval review last rejected a browser check due to usage limit; action not executed, no new browser/Compose/system-install acceptance. No Git checkpoint attempted after rejection; latest changes uncommitted.
+CURRENT TASK: User requested copy-paste context for new Codex account and prerequisite/link recovery. Full handoff saved in docs/NEW_CHAT_HANDOFF.md.
+EXACT NEXT STEP: Read full handoff; recheck services; finish verified WSL download/admin installation and Node24 install, reboot with user agreement if required, verify engine, stop project-native listeners before Compose, then perform remaining Compose acceptance preserving all data.
+
+
+Docker virtualization diagnostic: Ryzen5 4600H / Lenovo82EY reports VirtualizationFirmwareEnabled=true and HypervisorPresent=true. SLAT/VMMonitor WMI flags false under running hypervisor, do not infer unsupported hardware. WSL still missing. Normal token cannot inspect optional features/BCD. Next: administrator feature check and WSL repair without automatic reboot.
+
+
+Docker virtualization repair: administrator UAC launch succeeded. Both VirtualMachinePlatform and Microsoft-Windows-Subsystem-Linux were Disabled; Enable-WindowsOptionalFeature completed for both with NoRestart warnings. Windows RebootPending key is now present. WSL installer (wsl --install --no-distribution) remains running, PID33956 under admin PowerShell30812, with established HTTPS download connection. Log: .tools/docker-wsl-repair.log; script: .tools/repair-docker-wsl.ps1. Do not duplicate installer or reboot during download. Once log shows completion, user must save work/restart Windows, then verify wsl --version and Docker engine. No reboot or Docker validation performed yet.
+
+
+Docker recovery verified: WSL3.0.1 installed, default distro docker-desktop/version2; no Windows reboot-pending marker. Approved Docker engine info succeeds with server29.8.1; backend log confirms linux/wsl running. App ports stopped after restart. CURRENT TASK: First Compose build/start and local URL verification; preserve .env and all volumes.
+
+
+Prepared ignored .tools browser smoke adapted from existing marketplace test to Compose inbox8025. Native-only DB expiry omitted; remaining registration/OTP/images/lifecycle/SSE/responsive/deep reload assertions unchanged. Persistence fixture/storage saved under ignored .tools; tests not executed yet. First image build in progress.
+
