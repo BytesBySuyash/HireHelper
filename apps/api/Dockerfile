@@ -8,6 +8,6 @@ RUN npm ci
 COPY apps/api apps/api
 RUN npm run db:generate && npm run build -w apps/api
 WORKDIR /app/apps/api
-RUN mkdir -p /data/uploads && chown -R node:node /data /app
+RUN mkdir -p /data/uploads && chown -R node:node /data
 USER node
 CMD ["sh", "-c", "npm run db:migrate && npm run start"]

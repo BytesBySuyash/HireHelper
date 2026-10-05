@@ -20,8 +20,9 @@
 - [x] Finish WSL Windows installation and verify healthy Docker engine after restart
 - [ ] Optional global Node24 installation for native development (Compose includes Node24)
 - [x] Restore native preview and verify app/docs/readiness/inbox links return HTTP 200
-- [ ] Docker Compose build/start/restart and fresh-volume acceptance
+- [x] Docker Compose build/start/restart and first start with new named volumes
+- [x] Docker browser OTP/login/images/lifecycle/SSE/deep-link acceptance and persistence after actual restart
 - [x] README, architecture, ER/API/security/deployment/interview docs
 - [x] Dependency security updates; npm audit zero known advisories
 - [x] Native acceptance audit and stable checkpoint
-- [ ] Final full acceptance signoff after Docker Compose validation
+- [x] Final local acceptance signoff after native and Docker Compose validation
