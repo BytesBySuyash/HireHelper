@@ -2,6 +2,10 @@
 
 An independently rebuilt Angular full-stack portfolio application: post a task, offer help, select one helper and track work to owner-confirmed completion. Every account can post and help. This project does not claim Infosys endorsement.
 
+**Read the [complete project guide](docs/PROJECT_GUIDE.md)** for the user journey, architecture, database, security, API, local runtime, CI/CD and source-code flow.
+
+The selected public-demo setup is **GitHub Pages**: an interactive portfolio simulation with sample accounts and browser-local data. The real NestJS/PostgreSQL backend remains available in the repository and local application. The simulation sends no OTP email and does not share tasks between visitors. See [Pages preview and publishing](docs/GITHUB_PAGES.md). A public deployment has not yet been verified.
+
 Angular standalone components, lazy routes, Reactive Forms, HttpClient, RxJS and signals; Angular Material/SCSS; NestJS; PostgreSQL/Prisma migrations; Argon2id; Nodemailer/Mailpit; persistent local images; cookie-authenticated SSE. No external keys or accounts required locally.
 
 ![HireHelper feed on desktop](docs/screenshots/feed-1440.png)
@@ -11,6 +15,16 @@ Post tasks, offer help, select one helper and follow progress through owner-conf
 ## Start locally
 
 Prerequisites: Node 24 LTS (24.15+), npm, Git, Docker Desktop with Compose v2 (Windows: enable WSL2 engine), or Docker Engine/Compose v2 on Linux. Use Node 24 rather than Node 23. Exact pins are in package manifests and package-lock.json.
+
+For the browser-only Pages demo, Docker/database/email are unnecessary:
+
+```sh
+npm ci
+npm run build:pages -- --base-href /hirehelper/
+npm run preview:pages
+```
+
+Open http://localhost:4201/hirehelper/#/login while the preview runs. Choose Mira, Theo or Sam; use the visible sample-account selector to explore both sides of a task. Reset demo restores this browser's fictional sample data. The full application uses the separate commands below.
 
 Commands work in Windows PowerShell and Unix shells from the project root:
 
@@ -53,23 +67,23 @@ Keep `.env` in the repository root. Native services use localhost; the CLI reads
 
 `npm run setup` creates ignored `.env` only when absent, generates random DB/session/OTP secrets and preserves existing configuration. Do not enter backend secrets into Angular files. The `.env.example` placeholders cannot run as secrets.
 
-| Variable | Local value/purpose |
-|---|---|
-| NODE_ENV | development; production enables stricter validation |
-| APP_ORIGIN | http://localhost:4200; exact scheme/host/port used for CSRF |
-| API_PORT | 3000 |
-| POSTGRES_USER / POSTGRES_DB | hirehelper; compose DB configuration |
-| POSTGRES_PASSWORD | generated random password; preserve with existing DB volume |
-| DATABASE_URL | generated native PostgreSQL URL; Compose overrides hostname |
-| SESSION_SECRET | generated HMAC key for session and CSRF hashes |
-| OTP_SECRET | separate generated HMAC key for OTP challenges |
-| SMTP_HOST / SMTP_PORT | localhost / 1025 native, mailpit / 1025 container |
-| SMTP_SECURE | false for Mailpit; true for implicit TLS (usually 465) |
-| SMTP_USER / SMTP_PASSWORD | blank locally; optional real SMTP credentials/app password |
-| SMTP_FROM | HireHelper <no-reply@hirehelper.test> locally; verified sender for real SMTP |
-| UPLOAD_DIR | ./uploads native or persistent /data/uploads in Compose |
-| COOKIE_SECURE | false locally over HTTP; true for HTTPS production |
-| DEMO_SEED | false by default; true explicitly for development demo only |
+| Variable                    | Local value/purpose                                                          |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| NODE_ENV                    | development; production enables stricter validation                          |
+| APP_ORIGIN                  | http://localhost:4200; exact scheme/host/port used for CSRF                  |
+| API_PORT                    | 3000                                                                         |
+| POSTGRES_USER / POSTGRES_DB | hirehelper; compose DB configuration                                         |
+| POSTGRES_PASSWORD           | generated random password; preserve with existing DB volume                  |
+| DATABASE_URL                | generated native PostgreSQL URL; Compose overrides hostname                  |
+| SESSION_SECRET              | generated HMAC key for session and CSRF hashes                               |
+| OTP_SECRET                  | separate generated HMAC key for OTP challenges                               |
+| SMTP_HOST / SMTP_PORT       | localhost / 1025 native, mailpit / 1025 container                            |
+| SMTP_SECURE                 | false for Mailpit; true for implicit TLS (usually 465)                       |
+| SMTP_USER / SMTP_PASSWORD   | blank locally; optional real SMTP credentials/app password                   |
+| SMTP_FROM                   | HireHelper <no-reply@hirehelper.test> locally; verified sender for real SMTP |
+| UPLOAD_DIR                  | ./uploads native or persistent /data/uploads in Compose                      |
+| COOKIE_SECURE               | false locally over HTTP; true for HTTPS production                           |
+| DEMO_SEED                   | false by default; true explicitly for development demo only                  |
 
 For real SMTP obtain the host, port, TLS settings, username, password/app password and sender address from your mail provider. Enter them in backend `.env`; costs depend on the provider. No real SMTP credentials are needed for development. Production requires real SMTP (STARTTLS enforced unless implicit TLS), HTTPS origin, secure cookies and disabled seeding. Verify the SMTP connection at startup. Mailpit must be disabled in any production Compose configuration.
 

@@ -1,5 +1,7 @@
 # Architecture and domain
 
+This document describes the **full NestJS/PostgreSQL application**. The selected GitHub Pages demo uses the same frontend with a browser-local simulation; its authentication, persistence and notifications are different. Read the [complete project guide](PROJECT_GUIDE.md) for both modes and their pipelines, and the [Pages publishing guide](GITHUB_PAGES.md) for the current public-demo setup.
+
 ```mermaid
 flowchart LR
   Browser[Angular standalone app] -->|same origin /api HTTP cookies + CSRF| Proxy[Angular dev proxy / Nginx]
@@ -53,37 +55,37 @@ Notifications are written in the business transaction, then recipient-specific r
 
 Base `/api/v1`; Swagger UI `/api/docs`, JSON `/api/docs-json`. JSON error envelope: `{ "error": { "status": 409, "message": "..." } }`; validation messages may be arrays. 400 invalid input, 401 no authenticated session, 403 forbidden origin/ownership, 404 unavailable private resource, 409 duplicate/state conflict, 429 limits, 503 service readiness/email failure.
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | /auth/csrf | Signed CSRF cookie/token bootstrap |
-| POST | /auth/register | Names/email/password/confirmation/optional phone; registration OTP |
-| POST | /auth/login | Password validation followed by OTP; no session yet |
-| POST | /auth/forgot | Purpose-bound reset OTP; generic eligible response |
-| POST | /auth/resend | challengeId; 60-second cooldown, invalidates old code |
-| POST | /auth/verify | challengeId + six-digit code; session or reset authorization |
-| POST | /auth/reset | authorization + new password; revokes sessions/challenges |
-| GET | /auth/me | Current private account DTO |
-| POST | /auth/logout | Revoke current session and close events |
-| POST | /auth/profile | firstName/lastName/optional phone/avatarId |
-| POST | /auth/password | currentPassword + new password; signs out sessions |
-| POST | /auth/email | email/currentPassword; new address OTP, old email retained |
-| GET | /dashboard | Real open/owned/received/assigned counts |
-| GET | /tasks | page/limit/search/location/sort=soonest or newest |
-| GET | /tasks/mine | Paginated owner tasks across all states |
-| GET | /tasks/:id | Public identity + participant-specific contacts/request |
-| POST | /tasks | title/description/location/startAt/optional endAt/imageId |
-| PATCH, DELETE | /tasks/:id | Owner-only OPEN with no request history |
-| POST | /tasks/:id/requests | Optional message; identity from session |
-| GET | /requests/received, /requests/sent | Owner incoming versus helper outgoing |
-| POST | /requests/:id/accept, /reject, /withdraw | Authorized pending request actions |
-| POST | /tasks/:id/start, /complete-request | Selected helper lifecycle |
-| POST | /tasks/:id/confirm, /return, /cancel | Owner lifecycle; return requires reason |
-| POST | /files?use=TASK or AVATAR | Multipart file, max 5 MiB |
-| GET | /files/:id | Sanitized attached image; unattached requires owner |
-| GET | /notifications, /notifications/unread | Recipient-only paginated list/count |
-| POST | /notifications/:id/read, /notifications/read-all | Recipient-scoped updates |
-| GET | /notifications/events | Authenticated SSE |
-| GET | /health, /health/ready | Liveness / database readiness |
+| Method        | Path                                             | Purpose                                                            |
+| ------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
+| GET           | /auth/csrf                                       | Signed CSRF cookie/token bootstrap                                 |
+| POST          | /auth/register                                   | Names/email/password/confirmation/optional phone; registration OTP |
+| POST          | /auth/login                                      | Password validation followed by OTP; no session yet                |
+| POST          | /auth/forgot                                     | Purpose-bound reset OTP; generic eligible response                 |
+| POST          | /auth/resend                                     | challengeId; 60-second cooldown, invalidates old code              |
+| POST          | /auth/verify                                     | challengeId + six-digit code; session or reset authorization       |
+| POST          | /auth/reset                                      | authorization + new password; revokes sessions/challenges          |
+| GET           | /auth/me                                         | Current private account DTO                                        |
+| POST          | /auth/logout                                     | Revoke current session and close events                            |
+| POST          | /auth/profile                                    | firstName/lastName/optional phone/avatarId                         |
+| POST          | /auth/password                                   | currentPassword + new password; signs out sessions                 |
+| POST          | /auth/email                                      | email/currentPassword; new address OTP, old email retained         |
+| GET           | /dashboard                                       | Real open/owned/received/assigned counts                           |
+| GET           | /tasks                                           | page/limit/search/location/sort=soonest or newest                  |
+| GET           | /tasks/mine                                      | Paginated owner tasks across all states                            |
+| GET           | /tasks/:id                                       | Public identity + participant-specific contacts/request            |
+| POST          | /tasks                                           | title/description/location/startAt/optional endAt/imageId          |
+| PATCH, DELETE | /tasks/:id                                       | Owner-only OPEN with no request history                            |
+| POST          | /tasks/:id/requests                              | Optional message; identity from session                            |
+| GET           | /requests/received, /requests/sent               | Owner incoming versus helper outgoing                              |
+| POST          | /requests/:id/accept, /reject, /withdraw         | Authorized pending request actions                                 |
+| POST          | /tasks/:id/start, /complete-request              | Selected helper lifecycle                                          |
+| POST          | /tasks/:id/confirm, /return, /cancel             | Owner lifecycle; return requires reason                            |
+| POST          | /files?use=TASK or AVATAR                        | Multipart file, max 5 MiB                                          |
+| GET           | /files/:id                                       | Sanitized attached image; unattached requires owner                |
+| GET           | /notifications, /notifications/unread            | Recipient-only paginated list/count                                |
+| POST          | /notifications/:id/read, /notifications/read-all | Recipient-scoped updates                                           |
+| GET           | /notifications/events                            | Authenticated SSE                                                  |
+| GET           | /health, /health/ready                           | Liveness / database readiness                                      |
 
 Page defaults 1/12; maximum size 50, page 10000. Inputs use class-validator; unknown fields are rejected. UUID routes are validated before queries. Never accept a userId override. Public DTOs contain id/name/avatar only; no passwordHash, private email/phone, OTP or session hashes.
 

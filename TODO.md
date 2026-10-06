@@ -1,4 +1,5 @@
 # HireHelper implementation checklist
+
 - [x] Inspect workspace, requirements and available tools
 - [x] Pin compatible workspace dependencies and install lockfile
 - [x] Compose, native startup, secure configuration and environment setup (execution pending)
@@ -28,7 +29,23 @@
 - [x] Final local acceptance signoff after native and Docker Compose validation
 
 ## Portfolio repository
+
 - [x] README preview, contribution guide, runtime/editor configuration and CI workflow
 - [x] VSCode publishing guide and local lint/security checks
 - [ ] User publishes repository through intended GitHub account and verifies first hosted CI run
 - [ ] Owner chooses LICENSE; optional demo video/live deployment link
+
+## GitHub Pages portfolio demo
+
+- [x] User selected sample accounts/browser-local simulation instead of external hosting accounts
+- [x] Separate Pages build flag and hash routing; preserve normal full-stack mode
+- [x] Sample entry, visible disclosure, account switching and browser-local reset
+- [x] Browser-local task/offer/lifecycle/profile/image/notification flows
+- [x] Pages artifact validator, local static preview and deployment workflow
+- [x] Pages production build and artifact check
+- [x] Real Pages browser acceptance: no API calls, lifecycle/images/persistence/responsive layouts/isolation/reset
+- [x] Lint, type checks, normal production builds and 4 backend security units after demo changes
+- [x] Complete current-project guide and Pages publishing documentation
+- [ ] Complete GitHub sign-in for BytesBySuyash and publish public hirehelper repository
+- [ ] Enable Pages with GitHub Actions and verify hosted CI/deployment
+- [ ] Verify actual public demo URL before adding it to resume/README
