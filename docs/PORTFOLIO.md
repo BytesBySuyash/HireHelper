@@ -1,5 +1,7 @@
 # Interview walkthrough
 
+Current deployment update: **Vercel is the primary static demo target; Pages is optional and manual.** See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings. Both use the browser adapter and hash routes; the full backend remains local. CI now builds both static targets and tests the Vercel artifact. Date entry uses separate calendar and time controls. Demo recovery preserves unreadable saved data until explicit reset, labels memory fallback, and offers explicit refresh of expired open sample dates. Older Pages-specific descriptions below describe that secondary target.
+
 HireHelper is an independent implementation of an on-demand task assistance brief. Each user can both post and help; roles are permissions on individual tasks, not permanent account categories.
 
 Angular standalone components keep features small, lazy Router routes split the application bundle, Reactive Forms handle validation, HttpClient uses typed interfaces and a CSRF interceptor, signals hold view state, and RxJS coordinates SSE refresh and subscription cleanup. Material provides accessible form controls and the SCSS layout adapts to mobile drawers and desktop cards. UTC ISO timestamps are displayed in the viewer's timezone.
@@ -18,4 +20,4 @@ Use only after personally reviewing and running the corresponding implementation
 - Implemented email OTP authentication, revocable cookie sessions, server authorization, sanitized image uploads and persisted SSE notifications.
 - Validated assignment concurrency against PostgreSQL and exercised owner/helper workflows with Playwright browser contexts.
 
-Describe the internship separately and accurately. Do not imply Infosys endorsement, production adoption or invented users/performance metrics. See BUILD_PROGRESS.md for checks actually executed and outstanding validation.
+Describe the internship separately and accurately. Do not imply Infosys endorsement, production adoption or invented users/performance metrics. See [PROJECT_GUIDE.md](PROJECT_GUIDE.md) for test scope and pending hosted verification.

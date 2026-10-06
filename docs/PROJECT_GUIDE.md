@@ -1,10 +1,12 @@
 # HireHelper — complete project guide
 
+Current deployment update: **Vercel is the primary static demo target; Pages is optional and manual.** See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings. Both use the browser adapter and hash routes; the full backend remains local. CI now builds both static targets and tests the Vercel artifact. Date entry uses separate calendar and time controls. Demo recovery preserves unreadable saved data until explicit reset, labels memory fallback, and offers explicit refresh of expired open sample dates. Older Pages-specific descriptions below describe that secondary target.
+
 Documentation reviewed against the current source on **6 October 2026**.
 
 HireHelper is a neighbourhood task marketplace. Someone posts a task, other members offer to help, the owner chooses one helper, and both follow the work through to owner-confirmed completion. The same account can post tasks and help with other people's tasks; there are no permanent owner/helper account roles.
 
-The repository contains a **full-stack application** and a **GitHub Pages portfolio demo**. They share the Angular screens but use different data and authentication implementations. The Pages link is an interactive simulation, while the full application implements the real server-side workflows.
+The repository contains a **full-stack application** and a **static portfolio demo for Vercel and Pages**. They share the Angular screens but use different data and authentication implementations. The Pages link is an interactive simulation, while the full application implements the real server-side workflows.
 
 ## Contents
 
@@ -34,17 +36,18 @@ The repository contains a **full-stack application** and a **GitHub Pages portfo
 | Area | Current state |
 |---|---|
 | Full application | Implemented and previously validated locally with native services and Docker Compose |
-| Pages demo | Implemented; Pages build, artifact check and a real browser acceptance scenario passed |
-| Backend during Pages use | Not contacted; no API/database/email service is required |
+| Static demo | Vercel and optional Pages targets implemented; production browser checks passed locally |
+| Backend during static demo use | Not contacted; no API/database/email service is required |
 | Public repository | Intended owner is `BytesBySuyash`, intended repository is public `hirehelper`; this checkout has no Git remote configured at this review |
-| Public demo deployment | Workflow exists; a successful GitHub-hosted deployment and live URL have not been verified |
+| Public demo deployment | Vercel configuration and manual Pages workflow exist; no hosted deployment or live URL has been verified |
 | Intended Pages URL | `https://bytesbysuyash.github.io/hirehelper/` after publishing and successful deployment; this is an expected address, not evidence of a live site |
+| Local Vercel preview | `http://localhost:4202/#/login` while the preview server is running |
 | Local Pages preview | `http://localhost:4201/hirehelper/#/login` while the preview server is running |
 | Local full application | `http://localhost:4200` while Compose or the native application is running |
 | License | Not selected by the owner yet |
 | Demo video | Planned for later |
 
-Current public-demo direction is **GitHub Pages only**. Earlier cloud-hosting plans are superseded. Gmail API, Cloudinary storage, database image bytes, Render configuration and a combined cloud container are not features of the current backend. The unfinished cloud prototype was archived locally under ignored `.tools/hosted-preparation`; no prototype database migration was deployed.
+Current public-demo direction is **Vercel static demo, with optional manual Pages**. The full application remains a separate local runtime.
 
 ## 2. Features and scope
 
@@ -203,29 +206,29 @@ HireHelper/
           requests.ts       Incoming/outgoing offers
           settings.ts       Profile and full-app account security
           demo-mode.ts      Default build: demo mode disabled
-          demo-mode.pages.ts Pages build: demo mode enabled
+          demo-mode.pages.ts Vercel/Pages build: demo mode enabled
           demo-store.ts     Browser-local API simulation and persistence
           demo-entry.ts     Sample-account welcome screen
           demo-banner.ts    Demo disclosure, account switcher and reset
         styles.scss         Shared layout/theme and demo styles
       public/               Static assets, including task-fallback.svg
-      angular.json          Default/Pages build configurations
+      angular.json          Normal/Vercel/Pages build configurations
       nginx.conf            Full-app API proxy and SPA fallback
       Dockerfile            Frontend build and Nginx runtime
   .github/workflows/
     ci.yml                  Full source checks
     pages.yml               Static Pages build/upload/deploy
   scripts/                  Setup, local runners, backup/reset-related utilities
-                            and Pages preview/artifact validation
+                            and static demo preview/artifact validation
   tests/                    Full-app acceptance tests
-    pages/                  Pages-demo browser acceptance test
+    pages/                  Static demo browser tests
   compose.yaml              Full local application
   compose.test.yaml         Isolated PostgreSQL/Mailpit test services
   playwright.config.ts      Full-app browser test configuration
   pages.playwright.config.ts Pages browser test configuration
+  vercel.playwright.config.ts Vercel-root browser test configuration
+  vercel.json               Static deployment configuration
   docs/                     Architecture, guide, portfolio notes and screenshots
-  CODEX_PROGRESS.md         Recovery checkpoint and exact next actions
-  TODO.md                   Remaining-work checklist
 ```
 
 Read `main.ts` and `core.ts` first to understand frontend wiring, then `tasks.ts` and the Prisma schema to understand the real domain rules. Read `demo-store.ts` separately when examining the static demo.
@@ -562,6 +565,17 @@ npm run dev:api
 
 In another terminal run `npm run dev:web`. Angular's development proxy forwards `/api` to the API. Use consistent `localhost` origins for cookies and CSRF.
 
+### Vercel demo preview
+
+```powershell
+npm ci
+npm run build:vercel
+npm run check:vercel
+npm run preview:vercel
+```
+
+Open `http://localhost:4202/#/login`. Output is `apps/web/dist/vercel/browser`. No backend environment variables or services are used. The static account-entry loader excludes real authentication pages from the artifact.
+
 ### Pages preview without Docker
 
 ```powershell
@@ -573,60 +587,37 @@ npm run preview:pages
 
 Open `http://localhost:4201/hirehelper/#/login`. No `.env`, database, Mailpit or Docker is required for this demo. Output is `apps/web/dist/pages/browser`; the preview serves that exact static artifact on loopback.
 
-If `node` resolves to an unsupported global version, use Node 24. This machine also has an ignored supported runtime in `.tools/node_modules/node/bin/node.exe`; that machine-specific path is not required by other users.
+If `node` resolves to an unsupported global version, use Node 24. The supported runtime is required on PATH for ordinary npm commands.
 
 ## 15. GitHub CI and deployment pipeline
 
-There are **two independent workflows**. A successful code-check workflow is useful evidence, but it does not currently gate the Pages workflow.
+The primary static target is Vercel. The optional Pages workflow is manual. GitHub checks and Vercel Git deployments are independent; CI success does not gate publication unless explicitly configured.
 
 ```mermaid
 flowchart TD
-  P[Push main] --> CI[Build and checks: ci.yml]
-  P --> PG[Pages workflow: pages.yml]
-  PR[Pull request] --> CI
+  P[Push main or pull request] --> CI[GitHub source checks]
   CI --> I[npm ci and Prisma generation]
-  I --> Q[Lint and type checks]
-  Q --> B[Build normal API and frontend]
-  B --> T[Backend security/unit tests]
-  PG --> PI[npm ci]
-  PI --> PB[Build Pages frontend with repository base path]
-  PB --> PC[Check static artifact]
-  PC --> U[Upload Pages artifact]
-  U --> D[Deploy to github-pages environment]
-  D --> URL[Published HTTPS site URL]
+  I --> Q[Lint, typecheck, normal builds and backend units]
+  Q --> B[Build and inspect Vercel and Pages artifacts]
+  B --> T[Install Chromium and run demo browser tests]
+  P --> V[Vercel Git deployment, when connected]
+  V --> VB[npm ci and build:vercel]
+  VB --> S[Publish dist/vercel/browser]
+  M[Manual Pages dispatch] --> PG[Build Pages with repository base]
+  PG --> D[Upload and deploy Pages artifact]
 ```
 
-### Code-check workflow: `.github/workflows/ci.yml`
+### Code checks
 
-Triggers: push to main, pull request and manual dispatch.
+`.github/workflows/ci.yml` runs on main pushes, pull requests and manual dispatch. It installs locked dependencies, generates Prisma, lints, type-checks, builds the normal API/frontend, runs security units, builds and checks both demo targets, installs Chromium and runs `npm run test:demo`. It does not start PostgreSQL/Mailpit, run full-server browser scenarios, build Docker images or send external email. Hosted runs remain unverified until the repository is published.
 
-Steps: checkout → Node from `.nvmrc` → `npm ci` → Prisma client generation → lint → type checking → both normal builds → `npm test`.
+### Vercel build and publication
 
-Its GitHub token is read-only for repository contents. A per-workflow/ref concurrency group cancels older duplicate checks. It does not start PostgreSQL/Mailpit, run browser acceptance, build Docker images, test external email or automatically apply database migrations.
+The root `vercel.json` selects Other, `npm ci`, `npm run build:vercel` and `apps/web/dist/vercel/browser`. Use repository-root workspace installation and Node 24.x. No environment variables are needed. Hash routing avoids server-side refresh rewrites; missing assets stay 404. Normal authentication screens are excluded from demo builds through `auth-route` file replacement. See [DEPLOYMENT.md](DEPLOYMENT.md) for upload, account setup, actual-domain verification and update commands. No public domain has been verified.
 
-### Pages workflow: `.github/workflows/pages.yml`
+### Optional Pages
 
-Triggers: push to main and manual dispatch.
-
-The build job installs dependencies, derives the base path from the actual repository name, builds the `pages` frontend, validates the artifact, then uploads `apps/web/dist/pages/browser`. User-site repositories named `<owner>.github.io` use `/`; ordinary project repositories use `/<repository>/`.
-
-The deploy job runs only after its own build job succeeds. It grants `pages: write` and `id-token: write`, deploys with GitHub's Pages action, and reports the deployed URL in the `github-pages` environment. Builds have read-only content permissions. Pages concurrency avoids overlapping deployments and does not cancel the current deployment automatically.
-
-No backend credentials or third-party hosting keys are needed. Existing browser acceptance is a local/manual check; it is not currently a step in this workflow.
-
-### Publishing checklist
-
-1. Open the project in VS Code and review tracked files/recovery notes before making them public.
-2. Publish the existing Git history to public `BytesBySuyash/hirehelper`; do not reinitialize or upload a ZIP instead.
-3. On GitHub, open **Settings → Pages → Build and deployment → Source → GitHub Actions**.
-4. Push the code/workflow or run the Pages workflow manually from Actions.
-5. Wait for successful build and deploy jobs. Open the URL reported by the deployment.
-6. Test the hosted site from another device and reload a hash task URL.
-7. Add the actual verified link to GitHub's Website field and README/resume.
-
-Expected URL alone is not a deployment check. Publishing source code and enabling Pages are distinct operations.
-
-Official references: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages), [custom Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+`.github/workflows/pages.yml` runs only on manual dispatch. It derives `/<repository>/` for a project repository (or `/` for a GitHub user site), builds the Pages adapter, checks its static artifact and publishes through the Pages actions. It requires Pages and identity-token permissions, not backend secrets. It does not wait for the separate CI workflow. See [GITHUB_PAGES.md](GITHUB_PAGES.md).
 
 ## 16. Configuration and secrets
 
@@ -654,6 +645,9 @@ The npm `private: true` field prevents accidental npm package publication; it do
 
 ## 17. Testing and evidence
 
+The Vercel/date update passed nine production-demo browser scenarios locally: calendar/typed date validation and edit round trips, full owner/helper workflow, local images/profile persistence, isolated visitors, reset, malformed/old saved data, labelled memory fallback, quota preservation, expired sample refresh and guided garden completion. The main scenario asserts zero API requests, no EventSource connections and no page errors. Actual form/calendar checks fit 360/768/1440 widths and missing scripts returned 404. Two real Docker browser scenarios also passed against the updated frontend: OTP/task/image/lifecycle/notifications/responsive reloads, and pre-OTP/wrong-code/CSRF rejection. Source lint/type checks, normal builds, four backend units and both static artifact checks passed. Hosted CI and public deployment are still unverified.
+
+
 ### Commands
 
 ```powershell
@@ -677,7 +671,7 @@ Install Chromium with `npx playwright install chromium` if needed. On this machi
 
 ### Evidence available
 
-- Earlier full-app work recorded successful builds, type/lint checks, four backend security units, native integration/concurrency/auth scenarios, Docker browser acceptance and actual Compose restart persistence. See [BUILD_PROGRESS.md](BUILD_PROGRESS.md) for detailed runs and corrected reruns.
+- Earlier full-app work recorded successful builds, type/lint checks, four backend security units, native integration/concurrency/auth scenarios, Docker browser acceptance and actual Compose restart persistence. Historical detailed run notes are preserved locally; current commands and scope are below.
 - The Pages production build and artifact check passed locally.
 - During this documentation review, lint, both workspace type checks, normal API/frontend production builds and all four backend unit/security tests passed after the Pages changes.
 - One Pages browser acceptance scenario passed, covering sample entry, task creation, picture upload, owner/helper switching, requests/assignment, start/return/completion, reload persistence, 360/768/1440-width layouts, profile edits, independent visitor data and reset.
@@ -693,7 +687,7 @@ These are scenario-specific checks, not a guarantee of production availability, 
 
 `docker compose down` preserves named volumes. `docker compose up -d` reuses them. Container replacement does not erase the database, Mailpit history or upload volume.
 
-Back up **both** PostgreSQL and uploaded files; SQL metadata alone cannot restore disk-stored pictures. The README gives dump/copy commands that avoid PowerShell binary-redirection problems. Treat backups as private because they can contain contact/session/account data.
+Back up **both** PostgreSQL and uploaded files; SQL metadata alone cannot restore disk-stored pictures. Use `docker compose exec -T postgres pg_dump` to a file inside the container, then `docker compose cp` it to a private backup directory; copy the upload volume separately. Avoid redirecting binary data through Windows PowerShell 5.1. Treat backups as private because they can contain contact/session/account data.
 
 The explicit reset script removes local Compose data only when supplied its destructive confirmation flag. Do not use resets or delete volumes to fix routine configuration errors.
 
@@ -713,7 +707,7 @@ Browser data survives reloads on the same origin until cleared/reset. Clearing b
 | Pages demo asks for a server | Ensure the artifact was built with `build:pages`, not the normal `build` |
 | Pages assets return 404 | Repository base href and relative asset paths |
 | Pages task refresh returns 404 | Use hash URLs such as `/#/tasks/id`, not server routes like `/tasks/id` |
-| Sample Feed becomes empty over time | Reset demo to generate new future sample dates |
+| Sample Feed becomes empty over time | Use Refresh expired sample dates for open fictional listings, or explicitly reset the demo |
 | Demo storage full/unavailable | Reset this demo, permit storage or use another browser; do not enter sensitive details |
 | Public Pages URL returns 404 | Check repository visibility, Pages source, Actions logs and a successful deployment |
 
@@ -727,7 +721,7 @@ For workflow changes, check YAML and the actual commands locally. A hosted Actio
 
 Before deploying the real full-stack app publicly, supply server/database/persistent upload hosting, HTTPS, real SMTP, secure cookies, secrets, backups and staging acceptance. GitHub Pages alone cannot execute that backend.
 
-Potential future additions include shared SSE fanout, explicit accessibility coverage, gating Pages deployment on successful checks, browser acceptance in CI, production monitoring, and a recorded walkthrough. These are future work, not current features.
+Potential future additions include shared SSE fanout, explicit accessibility coverage, gating deployment on successful checks, production monitoring, and a recorded walkthrough. These are future work, not current features.
 
 The owner still needs to choose a license before offering specific reuse rights. A license decision is independent of whether the project is hosted. The demo video can be added after launch.
 
@@ -750,4 +744,4 @@ Be ready to explain:
 
 Avoid claiming the Pages demo is a live multi-user backend or that unverified cloud deployments/CI runs have passed. Screenshots, the tested workflow and the full source are useful evidence; the public link becomes evidence only after deployment is verified.
 
-Related documents: [README](../README.md), [architecture/API detail](ARCHITECTURE.md), [portfolio notes](PORTFOLIO.md), [Pages publishing guide](GITHUB_PAGES.md), [build history](BUILD_PROGRESS.md), [recovery checkpoint](../CODEX_PROGRESS.md), [remaining work](../TODO.md).
+Related documents: [README](../README.md), [architecture/API detail](ARCHITECTURE.md), [deployment](DEPLOYMENT.md), [portfolio notes](PORTFOLIO.md) and [optional Pages](GITHUB_PAGES.md).

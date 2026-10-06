@@ -1,6 +1,8 @@
 # Architecture and domain
 
-This document describes the **full NestJS/PostgreSQL application**. The selected GitHub Pages demo uses the same frontend with a browser-local simulation; its authentication, persistence and notifications are different. Read the [complete project guide](PROJECT_GUIDE.md) for both modes and their pipelines, and the [Pages publishing guide](GITHUB_PAGES.md) for the current public-demo setup.
+Current deployment update: **Vercel is the primary static demo target; Pages is optional and manual.** See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings. Both use the browser adapter and hash routes; the full backend remains local. CI now builds both static targets and tests the Vercel artifact. Date entry uses separate calendar and time controls. Demo recovery preserves unreadable saved data until explicit reset, labels memory fallback, and offers explicit refresh of expired open sample dates. Older Pages-specific descriptions below describe that secondary target.
+
+This document describes the **full NestJS/PostgreSQL application**. The Vercel and optional Pages demo uses the same frontend with a browser-local simulation; its authentication, persistence and notifications are different. Read the [complete project guide](PROJECT_GUIDE.md) for both modes and their pipelines, and the [deployment guide](DEPLOYMENT.md) for the current public-demo setup.
 
 ```mermaid
 flowchart LR

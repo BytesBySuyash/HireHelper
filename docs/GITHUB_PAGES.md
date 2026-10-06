@@ -1,6 +1,6 @@
 # Publish the HireHelper portfolio demo on GitHub Pages
 
-This is the selected public-demo setup. It uses only GitHub; no Render, Neon, SMTP or Cloudinary account is needed. The website uses fictional sample people and browser-local data. The real NestJS/PostgreSQL backend remains in the source repository and runs separately.
+This is an optional secondary deployment. Vercel is the primary target; see [deployment instructions](DEPLOYMENT.md). It uses only GitHub; no Render, Neon, SMTP or Cloudinary account is needed. The website uses fictional sample people and browser-local data. The real NestJS/PostgreSQL backend remains in the source repository and runs separately.
 
 ## Preview first
 
@@ -19,7 +19,7 @@ Open `http://localhost:4201/hirehelper/#/login` while the preview server is runn
 2. Press Ctrl+Shift+P > Publish to GitHub. Sign in as `BytesBySuyash` and choose public repository `hirehelper`. Publish the existing repository history.
 3. On GitHub, open the repository's Settings > Pages.
 4. Under Build and deployment, set Source to GitHub Actions.
-5. In Actions, open Deploy portfolio demo to GitHub Pages and run it if the initial push occurred before Pages was enabled.
+5. In Actions, open Deploy portfolio demo to GitHub Pages and run it manually; this workflow no longer runs on push.
 6. Wait for both build and deploy jobs to succeed. Use the actual URL reported in the `github-pages` deployment environment.
 7. Test the page from another device, switch sample people and reload a hash task URL. Then add the verified URL to the repository's Website field and README.
 
@@ -29,7 +29,7 @@ Expected project address after deployment: `https://bytesbysuyash.github.io/hire
 
 `.github/workflows/pages.yml` installs the locked dependencies, builds the Angular `pages` configuration, checks its artifact, uploads `apps/web/dist/pages/browser`, and deploys it. It never starts Nest, runs database migrations or sends email. It requires GitHub Pages permissions, not backend secrets.
 
-The regular CI workflow checks the full source separately. It currently does not gate Pages deployment; local Pages browser acceptance is also separate from the automated Pages workflow.
+The regular CI workflow checks the full source separately. It currently does not gate Pages deployment; the CI workflow also builds both static artifacts and runs the Vercel demo browser tests.
 
 ## Demo behavior
 
