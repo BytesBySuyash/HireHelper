@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "ng serve --host 0.0.0.0 --proxy-config proxy.conf.json",
     "build": "ng build",
+    "build:pages": "ng build --configuration pages",
     "typecheck": "ngc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {

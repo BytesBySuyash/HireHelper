@@ -1,0 +1,53 @@
+name: Deploy portfolio demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Build GitHub-only portfolio simulation
+        shell: bash
+        run: |
+          repository="${GITHUB_REPOSITORY#*/}"
+          base="/${repository}/"
+          if [[ "${repository,,}" == "${GITHUB_REPOSITORY_OWNER,,}.github.io" ]]; then base="/"; fi
+          npm run build:pages -- --base-href "$base"
+      - name: Check built demo
+        run: node scripts/check-pages-build.mjs
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist/pages/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -11,7 +11,13 @@ import { Api, Auth, Challenge, errorMessage, User } from './core';
       <div>
         <span class="eyebrow">MAKE YOURSELF AT HOME</span>
         <h1>Settings</h1>
-        <p class="muted">Manage your profile and account security.</p>
+        <p class="muted">
+          {{
+            api.demo
+              ? 'Edit a sample profile. Please use fictional details.'
+              : 'Manage your profile and account security.'
+          }}
+        </p>
       </div>
     </div>
     @if (error()) {
@@ -46,7 +52,7 @@ import { Api, Auth, Challenge, errorMessage, User } from './core';
           @if (auth.user()?.avatarId) {
             <img
               class="profile-avatar"
-              [src]="'/api/v1/files/' + auth.user()?.avatarId"
+              [src]="api.image(auth.user()?.avatarId)"
               alt="Your profile picture"
             />
           }
@@ -55,64 +61,82 @@ import { Api, Auth, Challenge, errorMessage, User } from './core';
         </form>
       </section>
       <div>
-        <section class="form-panel">
-          <h2>Change password</h2>
-          <form [formGroup]="password" (ngSubmit)="changePassword()">
-            <mat-form-field
-              ><mat-label>Current password</mat-label
-              ><input
-                matInput
-                type="password"
-                formControlName="currentPassword"
-                autocomplete="current-password" /></mat-form-field
-            ><mat-form-field
-              ><mat-label>New password</mat-label
-              ><input
-                matInput
-                type="password"
-                formControlName="password"
-                autocomplete="new-password"
-              /><mat-error>Use at least 12 characters.</mat-error></mat-form-field
-            >
-            <p class="muted">Changing your password signs out all sessions.</p>
-            <button mat-flat-button [disabled]="busy() || password.invalid">Change password</button>
-          </form>
-        </section>
-        <section class="form-panel">
-          <h2>Change email</h2>
-          <p class="muted">Current address: {{ auth.user()?.email }}</p>
-          @if (challenge()) {
-            <form [formGroup]="otp" (ngSubmit)="verify()">
+        @if (api.demo) {
+          <section class="form-panel">
+            <h2>Sample account</h2>
+            <p>
+              This is a portfolio simulation. Password changes, email verification and real account
+              registration are available in the full server version.
+            </p>
+            <p>
+              Switch sample people using the demo account selector. Reset demo restores the original
+              profiles, tasks and requests.
+            </p>
+          </section>
+        } @else {
+          <section class="form-panel">
+            <h2>Change password</h2>
+            <form [formGroup]="password" (ngSubmit)="changePassword()">
               <mat-form-field
-                ><mat-label>Code sent to new address</mat-label
-                ><input
-                  matInput
-                  formControlName="code"
-                  inputmode="numeric"
-                  autocomplete="one-time-code" /></mat-form-field
-              ><button mat-flat-button [disabled]="busy() || otp.invalid">Verify new email</button>
-            </form>
-            <button mat-button [disabled]="busy()" (click)="resend()">
-              Resend code (60-second cooldown)
-            </button>
-            <p class="muted">Your old address stays active until verification.</p>
-          } @else {
-            <form [formGroup]="email" (ngSubmit)="changeEmail()">
-              <mat-form-field
-                ><mat-label>New email address</mat-label
-                ><input matInput type="email" formControlName="email" /></mat-form-field
-              ><mat-form-field
-                ><mat-label>Confirm current password</mat-label
+                ><mat-label>Current password</mat-label
                 ><input
                   matInput
                   type="password"
-                  formControlName="currentPassword" /></mat-form-field
-              ><button mat-flat-button [disabled]="busy() || email.invalid">
-                Send verification code
+                  formControlName="currentPassword"
+                  autocomplete="current-password" /></mat-form-field
+              ><mat-form-field
+                ><mat-label>New password</mat-label
+                ><input
+                  matInput
+                  type="password"
+                  formControlName="password"
+                  autocomplete="new-password"
+                /><mat-error>Use at least 12 characters.</mat-error></mat-form-field
+              >
+              <p class="muted">Changing your password signs out all sessions.</p>
+              <button mat-flat-button [disabled]="busy() || password.invalid">
+                Change password
               </button>
             </form>
-          }
-        </section>
+          </section>
+          <section class="form-panel">
+            <h2>Change email</h2>
+            <p class="muted">Current address: {{ auth.user()?.email }}</p>
+            @if (challenge()) {
+              <form [formGroup]="otp" (ngSubmit)="verify()">
+                <mat-form-field
+                  ><mat-label>Code sent to new address</mat-label
+                  ><input
+                    matInput
+                    formControlName="code"
+                    inputmode="numeric"
+                    autocomplete="one-time-code" /></mat-form-field
+                ><button mat-flat-button [disabled]="busy() || otp.invalid">
+                  Verify new email
+                </button>
+              </form>
+              <button mat-button [disabled]="busy()" (click)="resend()">
+                Resend code (60-second cooldown)
+              </button>
+              <p class="muted">Your old address stays active until verification.</p>
+            } @else {
+              <form [formGroup]="email" (ngSubmit)="changeEmail()">
+                <mat-form-field
+                  ><mat-label>New email address</mat-label
+                  ><input matInput type="email" formControlName="email" /></mat-form-field
+                ><mat-form-field
+                  ><mat-label>Confirm current password</mat-label
+                  ><input
+                    matInput
+                    type="password"
+                    formControlName="currentPassword" /></mat-form-field
+                ><button mat-flat-button [disabled]="busy() || email.invalid">
+                  Send verification code
+                </button>
+              </form>
+            }
+          </section>
+        }
       </div>
     </div>`,
 })

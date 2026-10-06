@@ -12,6 +12,8 @@
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "build": "npm run build --workspaces",
+    "build:pages": "npm run build:pages -w apps/web --",
+    "preview:pages": "node scripts/preview-pages.mjs",
     "typecheck": "npm run typecheck --workspaces",
     "lint": "eslint apps scripts",
     "dev:api": "npm run dev -w apps/api",

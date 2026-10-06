@@ -17,6 +17,14 @@
             "assets": [{ "glob": "**/*", "input": "public", "output": "/" }]
           },
           "configurations": {
+            "pages": {
+              "outputPath": "dist/pages",
+              "fileReplacements": [
+                { "replace": "src/app/demo-mode.ts", "with": "src/app/demo-mode.pages.ts" }
+              ],
+              "budgets": [{ "type": "initial", "maximumWarning": "1MB", "maximumError": "2MB" }],
+              "outputHashing": "all"
+            },
             "production": {
               "budgets": [{ "type": "initial", "maximumWarning": "1MB", "maximumError": "2MB" }],
               "outputHashing": "all"
@@ -27,7 +35,10 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "configurations": { "development": { "buildTarget": "web:build:development" } },
+          "configurations": {
+            "development": { "buildTarget": "web:build:development" },
+            "pages": { "buildTarget": "web:build:pages" }
+          },
           "defaultConfiguration": "development"
         }
       }

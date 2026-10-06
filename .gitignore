@@ -12,3 +12,5 @@ test-results/
 *.log
 *.dump
 uploads-backup/
+client_secret*.json
+gmail-oauth*.json

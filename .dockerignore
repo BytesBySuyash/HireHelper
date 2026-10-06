@@ -7,3 +7,5 @@ node_modules
 uploads
 **/dist
 test-results
+client_secret*.json
+gmail-oauth*.json

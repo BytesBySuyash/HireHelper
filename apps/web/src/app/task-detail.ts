@@ -34,11 +34,7 @@ import { Api, Auth, errorMessage, Task } from './core';
       </div>
       <div class="detail-grid">
         <article class="detail-panel">
-          <img
-            class="detail-image"
-            [src]="t.imageId ? '/api/v1/files/' + t.imageId : '/task-fallback.svg'"
-            alt="Task picture"
-          />
+          <img class="detail-image" [src]="api.image(t.imageId)" alt="Task picture" />
           <h2>About this task</h2>
           <p class="description">{{ t.description }}</p>
           <div class="detail-meta">

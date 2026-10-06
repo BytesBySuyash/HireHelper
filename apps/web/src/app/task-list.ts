@@ -102,7 +102,7 @@ import { Api, Auth, errorMessage, Page, Task } from './core';
           <article class="task-card">
             <a [routerLink]="'/tasks/' + task.id" class="task-image"
               ><img
-                [src]="task.imageId ? '/api/v1/files/' + task.imageId : '/task-fallback.svg'"
+                [src]="api.image(task.imageId)"
                 alt=""
                 loading="lazy"
                 (error)="fallback($event)"
@@ -192,6 +192,8 @@ export class TaskList {
     }
   }
   fallback(event: Event) {
-    (event.target as HTMLImageElement).src = '/task-fallback.svg';
+    const image = event.target as HTMLImageElement;
+    image.onerror = null;
+    image.src = 'task-fallback.svg';
   }
 }

@@ -2,6 +2,8 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subject } from 'rxjs';
+import { DEMO_MODE } from './demo-mode';
+import { DemoStore, DEMO_EVENT } from './demo-store';
 export interface User {
   id: string;
   firstName: string;
@@ -69,16 +71,41 @@ export const csrfInterceptor: HttpInterceptorFn = (req, next) => {
 @Injectable({ providedIn: 'root' })
 export class Api {
   private http = inject(HttpClient);
+  readonly demo = DEMO_MODE;
+  private demoStore = DEMO_MODE
+    ? new DemoStore(localStorage, sessionStorage, () => window.dispatchEvent(new Event(DEMO_EVENT)))
+    : undefined;
+  demoUsers() {
+    return this.demoStore?.users() || [];
+  }
+  chooseDemo(id: string) {
+    if (!this.demoStore) throw new Error('Sample accounts are available only in the Pages demo.');
+    return this.demoStore.choose(id);
+  }
+  resetDemo() {
+    this.demoStore?.reset();
+  }
+  image(id?: string) {
+    return this.demoStore
+      ? this.demoStore.image(id)
+      : id
+        ? `/api/v1/files/${id}`
+        : 'task-fallback.svg';
+  }
   get<T>(path: string) {
+    if (this.demoStore) return this.demoStore.request('GET', path) as Promise<T>;
     return firstValueFrom(this.http.get<T>(`/api/v1/${path}`));
   }
   post<T>(path: string, body: unknown = {}) {
+    if (this.demoStore) return this.demoStore.request('POST', path, body) as Promise<T>;
     return firstValueFrom(this.http.post<T>(`/api/v1/${path}`, body));
   }
   patch<T>(path: string, body: unknown) {
+    if (this.demoStore) return this.demoStore.request('PATCH', path, body) as Promise<T>;
     return firstValueFrom(this.http.patch<T>(`/api/v1/${path}`, body));
   }
   delete<T>(path: string) {
+    if (this.demoStore) return this.demoStore.request('DELETE', path) as Promise<T>;
     return firstValueFrom(this.http.delete<T>(`/api/v1/${path}`));
   }
   async upload(file: File, use: 'TASK' | 'AVATAR') {
@@ -106,6 +133,17 @@ export class Auth {
   refresh = new Subject<void>();
   unread = signal(0);
   notifications = signal<Notice[]>([]);
+  private demoListening = false;
+  async chooseDemo(id: string) {
+    await this.signedIn(this.api.chooseDemo(id));
+  }
+  async resetDemo() {
+    this.api.resetDemo();
+    this.user.set(null);
+    this.unread.set(0);
+    this.notifications.set([]);
+    await this.router.navigateByUrl('/login');
+  }
   async init() {
     try {
       await this.api.get('auth/csrf');
@@ -136,6 +174,20 @@ export class Auth {
   }
   connect() {
     this.events?.close();
+    if (this.api.demo) {
+      if (!this.demoListening) {
+        const refresh = () => {
+          void this.reconcile();
+          this.refresh.next();
+        };
+        window.addEventListener(DEMO_EVENT, refresh);
+        window.addEventListener('storage', refresh);
+        this.demoListening = true;
+      }
+      void this.reconcile();
+      this.refresh.next();
+      return;
+    }
     this.events = new EventSource('/api/v1/notifications/events');
     this.events.onopen = () => {
       void this.reconcile();
