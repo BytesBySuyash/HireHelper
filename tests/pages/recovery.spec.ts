@@ -36,11 +36,14 @@ test('calendar and typed dates validate and survive editing in device timezone',
   await page.getByLabel('End time (optional)', { exact: true }).fill('09:30');
   await expect(page.getByRole('button', { name: 'Publish task' })).toBeDisabled();
   await page.getByRole('button', { name: 'Choose start time', exact: true }).click();
-  await expect(page.getByRole('listbox', { name: 'Start time options' })).toBeVisible();
-  await page.getByRole('option', { name: '10:30', exact: true }).click();
+  const startTimeOptions = page.getByRole('listbox', { name: 'Start time options' });
+  await expect(startTimeOptions).toBeVisible();
+  await startTimeOptions.getByRole('option', { name: '10:30', exact: true }).click();
   await expect(page.getByLabel('Start time', { exact: true })).toHaveValue('10:30');
   await page.getByRole('button', { name: 'Choose end time', exact: true }).click();
-  await page.getByRole('option', { name: '11:30', exact: true }).click();
+  const endTimeOptions = page.getByRole('listbox', { name: 'End time options' });
+  await expect(endTimeOptions).toBeVisible();
+  await endTimeOptions.getByRole('option', { name: '11:30', exact: true }).click();
   await expect(page.getByLabel('End time (optional)', { exact: true })).toHaveValue('11:30');
   await page.getByRole('button', { name: 'Publish task' }).click();
   await expect(page.getByRole('heading', { name: 'Calendar task', exact: true })).toBeVisible();
