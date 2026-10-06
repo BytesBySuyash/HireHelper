@@ -1125,3 +1125,38 @@ footer,
 .eyebrow {
   color: #4c6758;
 }
+
+.demo-banner > p,
+.demo-walkthrough {
+  flex-basis: 100%;
+  margin: 0;
+}
+.demo-walkthrough {
+  padding: 12px;
+  border: 1px solid #b8d4c2;
+  border-radius: 8px;
+}
+.demo-walkthrough li {
+  margin: 6px 0;
+}
+.demo-entry > button {
+  margin-bottom: 24px;
+}
+
+// Keep the optional guide reachable above the mobile drawer.
+.demo-banner {
+  position: relative;
+  z-index: 31;
+}
+@media (min-width: 851px) {
+  .static-demo .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .static-demo .workspace {
+    margin-left: 0;
+  }
+}

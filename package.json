@@ -22,7 +22,11 @@
     "db:migrate": "npm run db:migrate -w apps/api",
     "seed": "npm run seed -w apps/api",
     "test": "npm run test -w apps/api",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:vercel": "npm run build:vercel -w apps/web",
+    "preview:vercel": "node scripts/preview-pages.mjs --vercel",
+    "check:vercel": "node scripts/check-pages-build.mjs --vercel",
+    "test:demo": "playwright test --config vercel.playwright.config.ts"
   },
   "overrides": {
     "@nestjs/swagger": {

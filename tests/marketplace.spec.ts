@@ -56,10 +56,10 @@ test('real owner/helper flow, task image, notifications, lifecycle and responsiv
     .fill('Please help sort the books and arrange them on a bookshelf.');
   await a.getByLabel('Location', { exact: true }).fill('Maple district');
   const start = new Date(Date.now() + 86400000);
-  const local = new Date(start.getTime() - start.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 16);
-  await a.getByLabel('Start date and time', { exact: true }).fill(local);
+  await a
+    .getByLabel('Start date', { exact: true })
+    .fill(`${start.getDate()}/${start.getMonth() + 1}/${start.getFullYear()}`);
+  await a.getByLabel('Start time', { exact: true }).fill('10:30');
   const sharp = (await import('sharp')).default;
   const picture = await sharp({
     create: { width: 80, height: 60, channels: 3, background: '#78a57c' },

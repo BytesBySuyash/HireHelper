@@ -22,14 +22,14 @@ import { Api, Auth, errorMessage, Page, Task } from './core';
   template: ` <div class="page-heading">
       <div>
         <span class="eyebrow">{{
-          mine ? 'YOUR TASKS, ALL IN ONE PLACE' : 'FIND YOUR NEXT OPPORTUNITY TO HELP'
+          mine ? 'POSTED TASKS' : 'AVAILABLE TASKS'
         }}</span>
-        <h1>{{ mine ? 'My Tasks' : 'Hello, ' + auth.user()?.firstName + ' 👋' }}</h1>
+        <h1>{{ mine ? 'My Tasks' : 'Hello, ' + auth.user()?.firstName }}</h1>
         <p class="muted">
           {{
             mine
               ? 'Keep track of the tasks you’ve posted.'
-              : 'A little time, a useful skill, a helping hand. Explore what’s happening nearby.'
+              : 'Search open tasks from other community members.'
           }}
         </p>
       </div>

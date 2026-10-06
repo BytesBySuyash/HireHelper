@@ -11,10 +11,12 @@ import {
 import { Auth, csrfInterceptor } from './app/core';
 import { DEMO_MODE } from './app/demo-mode';
 import { DemoBanner } from './app/demo-banner';
+import { authPage } from './app/auth-route';
 const guarded: CanActivateFn = () =>
   inject(Auth).user() ? true : inject(Router).parseUrl('/login');
 @Component({
   selector: 'app-root',
+  host: { '[class.static-demo]': 'demo' },
   standalone: true,
   imports: [RouterOutlet, DemoBanner],
   template: '@if (demo) { <app-demo-banner /> } <router-outlet />',
@@ -22,10 +24,6 @@ const guarded: CanActivateFn = () =>
 class App {
   demo = DEMO_MODE;
 }
-const authPage = () =>
-  DEMO_MODE
-    ? import('./app/demo-entry').then((m) => m.DemoEntry)
-    : import('./app/auth-page').then((m) => m.AuthPage);
 bootstrapApplication(App, {
   providers: [
     provideHttpClient(withInterceptors([csrfInterceptor])),

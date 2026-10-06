@@ -25,8 +25,8 @@ import { Auth } from './core';
         </nav>
         <div class="sidebar-note">
           <span>✦</span>
-          <h3>Small tasks.<br />Stronger communities.</h3>
-          <p>Someone nearby could use a hand like yours.</p>
+          <h3>Post a task.<br />Offer help.</h3>
+          <p>Manage tasks and offers from your workspace.</p>
           <a routerLink="/add-task">Post your first task →</a>
         </div>
         <div class="sidebar-user">
@@ -54,7 +54,7 @@ import { Auth } from './core';
             aria-label="Toggle navigation"
           >
             ☰</button
-          ><span class="topbar-caption">Make room for a little help.</span>
+          ><span class="topbar-caption">Task assistance</span>
           <div class="topbar-actions">
             <button
               mat-button
@@ -92,7 +92,7 @@ import { Auth } from './core';
           </section>
         }
         <main class="content" id="main-content"><router-outlet /></main>
-        <footer>HireHelper · Independently rebuilt portfolio project</footer>
+        <footer>HireHelper · Portfolio project</footer>
       </div>
     </div>`,
 })

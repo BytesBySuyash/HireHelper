@@ -13,31 +13,87 @@
             "browser": "src/main.ts",
             "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
-            "styles": ["src/styles.scss"],
-            "assets": [{ "glob": "**/*", "input": "public", "output": "/" }]
+            "styles": [
+              "src/styles.scss"
+            ],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public",
+                "output": "/"
+              }
+            ]
           },
           "configurations": {
             "pages": {
               "outputPath": "dist/pages",
               "fileReplacements": [
-                { "replace": "src/app/demo-mode.ts", "with": "src/app/demo-mode.pages.ts" }
+                {
+                  "replace": "src/app/demo-mode.ts",
+                  "with": "src/app/demo-mode.pages.ts"
+                },
+                {
+                  "replace": "src/app/auth-route.ts",
+                  "with": "src/app/auth-route.demo.ts"
+                }
               ],
-              "budgets": [{ "type": "initial", "maximumWarning": "1MB", "maximumError": "2MB" }],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                }
+              ],
               "outputHashing": "all"
             },
             "production": {
-              "budgets": [{ "type": "initial", "maximumWarning": "1MB", "maximumError": "2MB" }],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                }
+              ],
               "outputHashing": "all"
             },
-            "development": { "optimization": false, "sourceMap": true }
+            "development": {
+              "optimization": false,
+              "sourceMap": true
+            },
+            "vercel": {
+              "outputPath": "dist/vercel",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/demo-mode.ts",
+                  "with": "src/app/demo-mode.pages.ts"
+                },
+                {
+                  "replace": "src/app/auth-route.ts",
+                  "with": "src/app/auth-route.demo.ts"
+                }
+              ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
+                }
+              ],
+              "outputHashing": "all",
+              "baseHref": "/"
+            }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "development": { "buildTarget": "web:build:development" },
-            "pages": { "buildTarget": "web:build:pages" }
+            "development": {
+              "buildTarget": "web:build:development"
+            },
+            "pages": {
+              "buildTarget": "web:build:pages"
+            }
           },
           "defaultConfiguration": "development"
         }

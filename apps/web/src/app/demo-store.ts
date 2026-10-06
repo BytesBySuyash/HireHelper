@@ -22,7 +22,167 @@ const DATA_KEY = 'hirehelper:pages-demo:v1';
 const SESSION_KEY = 'hirehelper:pages-demo:user';
 export const DEMO_EVENT = 'hirehelper:demo-changed';
 
+function memoryStorage(): StorageLike {
+  const values = new Map<string, string>();
+  return {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => {
+      values.set(key, value);
+    },
+    removeItem: (key) => {
+      values.delete(key);
+    },
+  };
+}
+export function browserDemo(changed: () => void): DemoStore {
+  try {
+    const data = window.localStorage,
+      session = window.sessionStorage;
+    data.getItem(DATA_KEY);
+    session.getItem(SESSION_KEY);
+    // Check session writes without changing the selected member.
+    const probe = 'hirehelper:demo:storage-probe';
+    session.setItem(probe, '1');
+    session.removeItem(probe);
+    return new DemoStore(data, session, changed);
+  } catch {
+    const store = new DemoStore(memoryStorage(), memoryStorage(), changed);
+    store.temporary = true;
+    return store;
+  }
+}
+// Validate references as well as arrays before templates or domain operations read them.
+function validState(value: unknown): value is State {
+  if (!value || typeof value !== 'object') return false;
+  const s = value as State;
+  const text = (v: unknown) => typeof v === 'string';
+  const date = (v: unknown) => text(v) && Number.isFinite(Date.parse(v as string));
+  if (
+    s.version !== 1 ||
+    !Array.isArray(s.users) ||
+    !Array.isArray(s.tasks) ||
+    !Array.isArray(s.requests) ||
+    !Array.isArray(s.notices) ||
+    !s.images ||
+    typeof s.images !== 'object' ||
+    Array.isArray(s.images)
+  )
+    return false;
+  const unique = (rows: { id: string }[]) => new Set(rows.map((v) => v.id)).size === rows.length;
+  if (
+    !s.users.length ||
+    !s.users.every((u) => u && text(u.id) && text(u.firstName) && text(u.lastName)) ||
+    !unique(s.users)
+  )
+    return false;
+  const user = (id: string) => s.users.some((u) => u.id === id);
+  if (
+    !Object.entries(s.images).every(
+      ([id, i]) =>
+        id &&
+        i &&
+        user(i.ownerId) &&
+        ['TASK', 'AVATAR'].includes(i.use) &&
+        /^data:image\/(?:webp|png|jpeg);base64,/.test(i.data),
+    )
+  )
+    return false;
+  const image = (id?: string) => !id || !!s.images[id];
+  if (!s.users.every((u) => image(u.avatarId))) return false;
+  if (
+    !s.tasks.every(
+      (t) =>
+        t &&
+        text(t.id) &&
+        user(t.ownerId) &&
+        text(t.title) &&
+        text(t.description) &&
+        text(t.location) &&
+        date(t.startAt) &&
+        date(t.createdAt) &&
+        (!t.endAt || date(t.endAt)) &&
+        image(t.imageId) &&
+        [
+          'OPEN',
+          'ASSIGNED',
+          'IN_PROGRESS',
+          'COMPLETION_PENDING',
+          'COMPLETED',
+          'CANCELLED',
+        ].includes(t.status) &&
+        (!t.helperId || user(t.helperId)) &&
+        (!['ASSIGNED', 'IN_PROGRESS', 'COMPLETION_PENDING', 'COMPLETED'].includes(t.status) ||
+          !!t.helperId),
+    ) ||
+    !unique(s.tasks)
+  )
+    return false;
+  const task = (id: string) => s.tasks.some((t) => t.id === id);
+  if (
+    !s.requests.every(
+      (v) =>
+        v &&
+        text(v.id) &&
+        task(v.taskId) &&
+        user(v.requesterId) &&
+        ['PENDING', 'ACCEPTED', 'REJECTED', 'WITHDRAWN', 'CANCELLED'].includes(v.status),
+    ) ||
+    !unique(s.requests)
+  )
+    return false;
+  return (
+    s.notices.every(
+      (n) =>
+        n &&
+        text(n.id) &&
+        user(n.recipientId) &&
+        text(n.body) &&
+        date(n.createdAt) &&
+        (!n.taskId || task(n.taskId)),
+    ) && unique(s.notices)
+  );
+}
 export class DemoStore {
+  temporary = false;
+  status() {
+    try {
+      const state = this.load();
+      return {
+        error: '',
+        temporary: this.temporary,
+        expired: state.tasks.some(
+          (t) =>
+            /^sample-[1-6]$/.test(t.id) &&
+            t.status === 'OPEN' &&
+            Date.parse(t.startAt) <= Date.now(),
+        ),
+        garden: state.tasks.find((t) => t.id === 'sample-1')?.status,
+      };
+    } catch (e) {
+      return {
+        error: e instanceof Error ? e.message : 'Unable to read demo data.',
+        temporary: this.temporary,
+        expired: false,
+        garden: undefined,
+      };
+    }
+  }
+  refreshSamples() {
+    const state = this.load();
+    state.tasks.forEach((t, i) => {
+      if (
+        /^sample-[1-6]$/.test(t.id) &&
+        t.status === 'OPEN' &&
+        Date.parse(t.startAt) <= Date.now()
+      ) {
+        const old = Date.parse(t.startAt);
+        t.startAt = new Date(Date.now() + (i + 2) * 86400000).toISOString();
+        if (t.endAt)
+          t.endAt = new Date(Date.parse(t.startAt) + Date.parse(t.endAt) - old).toISOString();
+      }
+    });
+    this.save(state);
+  }
   constructor(
     private data: StorageLike,
     private session: StorageLike,
@@ -114,15 +274,7 @@ export class DemoStore {
       const raw = this.data.getItem(DATA_KEY);
       if (raw) {
         const state = JSON.parse(raw) as State;
-        if (
-          state.version !== 1 ||
-          !Array.isArray(state.users) ||
-          !Array.isArray(state.tasks) ||
-          !Array.isArray(state.requests) ||
-          !Array.isArray(state.notices) ||
-          !state.images
-        )
-          throw new Error('Unsupported demo data.');
+        if (!validState(state)) throw new Error('Unsupported demo data.');
         return state;
       }
       const state = this.seed();
@@ -130,7 +282,7 @@ export class DemoStore {
       return state;
     } catch {
       throw new Error(
-        'Demo storage is unavailable or damaged. Allow browser storage, or use Reset demo.',
+        'Saved demo data cannot be read (damaged, older version, or unavailable storage). Your saved data has not been removed. Use Reset demo to restore sample tasks, or try another browser.',
       );
     }
   }
@@ -146,7 +298,11 @@ export class DemoStore {
     if (notify) this.changed();
   }
   users() {
-    return this.load().users.map((u) => ({ ...u }));
+    try {
+      return this.load().users.map((u) => ({ ...u }));
+    } catch {
+      return [];
+    }
   }
   choose(id: string): User {
     const user = this.load().users.find((u) => u.id === id);
@@ -402,7 +558,7 @@ export class DemoStore {
         task.status = 'CANCELLED';
         for (const request of history)
           if (['PENDING', 'ACCEPTED'].includes(request.status)) {
-            request.status = 'CANCELLED';
+            if (request.status === 'PENDING') request.status = 'REJECTED';
             this.notify(state, request.requesterId, `${task.title} was cancelled.`, task.id);
           }
       } else if (action === 'start' && helper && task.status === 'ASSIGNED') {
@@ -448,6 +604,10 @@ export class DemoStore {
       if (!request || !task || request.status !== 'PENDING' || task.status !== 'OPEN')
         throw new Error('Request unavailable.');
       const action = segments[2];
+      if (action === 'accept' && Date.parse(task.startAt) <= Date.now())
+        throw new Error(
+          'This task has expired. Refresh expired sample dates or choose a future task.',
+        );
       if (action === 'withdraw' && request.requesterId === user.id) request.status = 'WITHDRAWN';
       else if (['accept', 'reject'].includes(action) && task.ownerId === user.id) {
         request.status = action === 'accept' ? 'ACCEPTED' : 'REJECTED';

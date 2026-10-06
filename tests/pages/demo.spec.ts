@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test';
 test('Pages demo runs without API calls: image, owner/helper lifecycle, persistence, privacy and reset', async ({
   page,
   browser,
+  baseURL,
 }) => {
   const apiRequests: string[] = [];
   const errors: string[] = [];
@@ -10,8 +11,17 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
     if (new URL(r.url()).pathname.startsWith('/api/')) apiRequests.push(r.url());
   });
   page.on('pageerror', (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'EventSource', {
+      value: class {
+        constructor() {
+          throw new Error('Unexpected EventSource connection');
+        }
+      },
+    });
+  });
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: /Try a neighbourhood/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Post a task. Find a helper./ })).toBeVisible();
   await page.getByRole('button', { name: 'Explore as Mira' }).click();
   await expect(page.getByRole('heading', { name: /Hello, Mira/ })).toBeVisible();
   await page.getByRole('link', { name: 'Add Task', exact: true }).click();
@@ -23,10 +33,9 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
   await page.getByLabel('Location', { exact: true }).fill('Demo district');
   const future = new Date(Date.now() + 86400000);
   await page
-    .getByLabel('Start date and time', { exact: true })
-    .fill(
-      new Date(future.getTime() - future.getTimezoneOffset() * 60000).toISOString().slice(0, 16),
-    );
+    .getByLabel('Start date', { exact: true })
+    .fill(`${future.getDate()}/${future.getMonth() + 1}/${future.getFullYear()}`);
+  await page.getByLabel('Start time', { exact: true }).fill('10:30');
   const sharp = (await import('sharp')).default;
   const image = await sharp({
     create: { width: 80, height: 60, channels: 3, background: '#78a57c' },
@@ -93,14 +102,14 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
   await expect(page.getByLabel('First name')).toHaveValue('Demo Mira');
   const fresh = await browser.newContext();
   const other = await fresh.newPage();
-  await other.goto('http://localhost:4201/hirehelper/');
+  await other.goto(baseURL!);
   await other.getByRole('button', { name: 'Explore as Mira' }).click();
-  await other.goto('http://localhost:4201/hirehelper/#/my-tasks');
+  await other.goto(`${baseURL}#/my-tasks`);
   await expect(other.getByRole('link', { name: title, exact: true })).toHaveCount(0);
   await fresh.close();
   page.once('dialog', (dialog) => dialog.accept());
   await page.getByRole('button', { name: 'Reset demo', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /Try a neighbourhood/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Post a task. Find a helper./ })).toBeVisible();
   await page.getByRole('button', { name: 'Explore as Mira' }).click();
   await page.goto('./#/my-tasks');
   await expect(page.getByRole('link', { name: title, exact: true })).toHaveCount(0);

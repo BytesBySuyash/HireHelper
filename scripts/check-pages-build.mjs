@@ -1,7 +1,8 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
-const root = resolve('apps/web/dist/pages/browser');
+const vercel = process.argv.includes('--vercel');
+const root = resolve(`apps/web/dist/${vercel ? 'vercel' : 'pages'}/browser`);
 const html = await readFile(resolve(root, 'index.html'), 'utf8');
 assert.match(html, /<base href="\/[^"\s]*\/"|<base href="\/"/);
 assert.match(html, /<app-root>/);
@@ -15,11 +16,27 @@ const scripts = await Promise.all(
   names.filter((n) => n.endsWith('.js')).map((n) => readFile(resolve(root, n), 'utf8')),
 );
 assert(
-  scripts.some((s) => s.includes('Portfolio demo') && s.includes('browser-local data')),
-  'The artifact must display the Pages demo label',
+  scripts.some(
+    (s) => s.includes('Interactive demo.') && s.includes('Changes stay in this browser.'),
+  ),
+  'The artifact must display the static demo label',
 );
 assert(
   scripts.some((s) => s.includes('hirehelper:pages-demo:v1')),
   'Missing browser-local demo adapter',
 );
-console.log('Pages artifact contains the app, demo adapter, disclosure and base-path assets.');
+
+
+if (vercel) assert.match(html, /<base href="\/">/);
+for (const name of names)
+  assert(!/\.(?:map|pdf|env|md)$/.test(name), `Unexpected public document: ${name}`);
+for (const source of scripts)
+  assert(
+    !/https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?/.test(source),
+    'Local runtime URL in artifact',
+  );
+
+if (vercel) {
+  for (const source of [html, ...scripts]) assert(!source.includes('/hirehelper/'), 'Pages base path in Vercel artifact');
+}
+console.log(`${vercel ? 'Vercel' : 'Pages'} artifact passed: app, adapter, disclosure, assets, base path and no local runtime links.`);

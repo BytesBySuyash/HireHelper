@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/commo
 import { Router } from '@angular/router';
 import { firstValueFrom, Subject } from 'rxjs';
 import { DEMO_MODE } from './demo-mode';
-import { DemoStore, DEMO_EVENT } from './demo-store';
+import { browserDemo, DEMO_EVENT } from './demo-store';
 export interface User {
   id: string;
   firstName: string;
@@ -73,13 +73,19 @@ export class Api {
   private http = inject(HttpClient);
   readonly demo = DEMO_MODE;
   private demoStore = DEMO_MODE
-    ? new DemoStore(localStorage, sessionStorage, () => window.dispatchEvent(new Event(DEMO_EVENT)))
+    ? browserDemo(() => window.dispatchEvent(new Event(DEMO_EVENT)))
     : undefined;
+  demoStatus() {
+    return this.demoStore?.status();
+  }
+  refreshDemoSamples() {
+    this.demoStore?.refreshSamples();
+  }
   demoUsers() {
     return this.demoStore?.users() || [];
   }
   chooseDemo(id: string) {
-    if (!this.demoStore) throw new Error('Sample accounts are available only in the Pages demo.');
+    if (!this.demoStore) throw new Error('Sample accounts are available only in the static demo.');
     return this.demoStore.choose(id);
   }
   resetDemo() {

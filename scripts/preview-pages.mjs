@@ -3,9 +3,10 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
 
-const root = resolve('apps/web/dist/pages/browser');
-const base = process.env.PAGES_BASE_PATH || '/hirehelper/';
-const port = Number(process.env.PAGES_PREVIEW_PORT || 4201);
+const vercel = process.argv.includes('--vercel');
+const root = resolve(`apps/web/dist/${vercel ? 'vercel' : 'pages'}/browser`);
+const base = process.env.PAGES_BASE_PATH || (vercel ? '/' : '/hirehelper/');
+const port = Number(process.env.PAGES_PREVIEW_PORT || (vercel ? 4202 : 4201));
 if (!/^\/(?:[a-zA-Z0-9_.-]+\/)*$/.test(base)) throw new Error('Invalid PAGES_BASE_PATH.');
 await stat(resolve(root, 'index.html'));
 const types = {
@@ -54,5 +55,5 @@ const server = createServer(async (req, res) => {
   }
 });
 server.listen(port, '127.0.0.1', () =>
-  console.log(`Pages demo preview: http://localhost:${port}${base}#/login`),
+  console.log(`Static demo preview: http://localhost:${port}${base}#/login`),
 );

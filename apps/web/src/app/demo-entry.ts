@@ -7,12 +7,19 @@ import { Auth, errorMessage } from './core';
   imports: [MatButtonModule],
   template: `<main class="demo-entry">
     <a class="brand" href="#/login">h<span>HireHelper</span></a>
-    <span class="eyebrow">A LITTLE HELP. A BIG DIFFERENCE.</span>
-    <h1>Try a neighbourhood<br />built around helping.</h1>
+
+    <h1>Post a task. Find a helper.</h1>
     <p class="demo-intro">
-      Explore the marketplace as a sample community member. Post a task, offer a hand, and follow
-      the work through to completion.
+      HireHelper connects people who need help with everyday tasks to members who can help, from the
+      first offer to confirmed completion.
     </p>
+    <button
+      mat-flat-button
+      [disabled]="busy() || !!auth.api.demoStatus()?.error"
+      (click)="enter('mira')"
+    >
+      Try demo
+    </button>
     <section class="demo-people" aria-label="Sample accounts">
       @for (person of auth.api.demoUsers(); track person.id) {
         <article>

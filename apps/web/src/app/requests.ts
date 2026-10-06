@@ -8,8 +8,8 @@ import { Api, Auth, errorMessage, HelpRequest, Page } from './core';
   imports: [RouterLink, MatButtonModule],
   template: `<div class="page-heading">
       <div>
-        <span class="eyebrow">GOOD THINGS START WITH A CONNECTION</span>
-        <h1>{{ received ? 'Requests received' : 'My Requests' }}</h1>
+        <span class="eyebrow">HELPER OFFERS</span>
+        <h1>{{ received ? 'Requests received' : 'Offers sent' }}</h1>
         <p class="muted">
           {{
             received
@@ -22,7 +22,7 @@ import { Api, Auth, errorMessage, HelpRequest, Page } from './core';
     @if (!received) {
       <div class="tabs">
         <button mat-button [class.selected]="!assignedOnly()" (click)="assignedOnly.set(false)">
-          All my requests</button
+          All my offers</button
         ><button mat-button [class.selected]="assignedOnly()" (click)="assignedOnly.set(true)">
           Assigned to me
         </button>
@@ -150,6 +150,7 @@ export class RequestsPage {
       !confirm('Select this helper? All other pending requests will be rejected.')
     )
       return;
+    if (this.busy()) return;
     this.busy.set(true);
     this.error.set('');
     try {

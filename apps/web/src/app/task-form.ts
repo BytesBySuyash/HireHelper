@@ -1,16 +1,87 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, signal, Injectable } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import {
+  DateAdapter,
+  NativeDateAdapter,
+  MAT_DATE_LOCALE,
+  MAT_DATE_FORMATS,
+} from '@angular/material/core';
 import { Api, errorMessage, Task } from './core';
+// Parse typed dates explicitly; Date.parse interprets ambiguous dates differently by browser.
+@Injectable()
+class TaskDateAdapter extends NativeDateAdapter {
+  override parse(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    const parts = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
+    if (!parts) return new Date(NaN);
+    const [, day, month, year] = parts.map(Number);
+    const result = new Date(year, month - 1, day);
+    return result.getFullYear() === year &&
+      result.getMonth() === month - 1 &&
+      result.getDate() === day
+      ? result
+      : new Date(NaN);
+  }
+}
+function timestamp(date: Date | null, time: string): Date | null {
+  if (
+    !(date instanceof Date) ||
+    !Number.isFinite(date.getTime()) ||
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+  )
+    return null;
+  const [hours, minutes] = time.split(':').map(Number);
+  const value = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
+  // Reject a nonexistent local time during a daylight-saving transition.
+  return value.getHours() === hours && value.getMinutes() === minutes ? value : null;
+}
+function schedule(control: AbstractControl) {
+  const v = control.value;
+  const start = timestamp(v.startDate, v.startTime);
+  if (!start || start.getTime() <= Date.now())
+    return { schedule: 'Choose a valid future start date and time.' };
+  if (v.endDate || v.endTime) {
+    const end = timestamp(v.endDate, v.endTime);
+    if (!end) return { schedule: 'Enter both an end date and time, or leave both empty.' };
+    if (end <= start) return { schedule: 'End time must follow start time.' };
+  }
+  return null;
+}
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: TaskDateAdapter },
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
+    {
+      provide: MAT_DATE_FORMATS,
+      useValue: {
+        parse: { dateInput: null },
+        display: {
+          dateInput: { day: '2-digit', month: '2-digit', year: 'numeric' },
+          monthYearLabel: { month: 'short', year: 'numeric' },
+          dateA11yLabel: { dateStyle: 'full' },
+          monthYearA11yLabel: { month: 'long', year: 'numeric' },
+        },
+      },
+    },
+  ],
   template: ` <div class="page-heading">
       <div>
-        <span class="eyebrow">LET YOUR COMMUNITY LEND A HAND</span>
+        <span class="eyebrow">TASK DETAILS</span>
         <h1>{{ id ? 'Edit task' : 'Post a task' }}</h1>
         <p class="muted">Tell people what you need, where, and when.</p>
       </div>
@@ -38,15 +109,45 @@ import { Api, errorMessage, Task } from './core';
         >
         <div class="form-row">
           <mat-form-field
-            ><mat-label>Start date and time</mat-label
-            ><input matInput type="datetime-local" formControlName="startAt" /><mat-error
-              >Choose a future start.</mat-error
+            ><mat-label>Start date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              formControlName="startDate"
+              placeholder="DD/MM/YYYY"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker><mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-error>Enter a valid date as DD/MM/YYYY.</mat-error>
+          </mat-form-field>
+          <mat-form-field
+            ><mat-label>Start time</mat-label
+            ><input matInput type="time" formControlName="startTime" /><mat-error
+              >Enter a start time.</mat-error
             ></mat-form-field
-          ><mat-form-field
-            ><mat-label>End date and time (optional)</mat-label
-            ><input matInput type="datetime-local" formControlName="endAt"
+          >
+        </div>
+        <div class="form-row">
+          <mat-form-field
+            ><mat-label>End date (optional)</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              formControlName="endDate"
+              placeholder="DD/MM/YYYY"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker><mat-hint>DD/MM/YYYY</mat-hint>
+            <mat-error>Enter a valid date as DD/MM/YYYY.</mat-error>
+          </mat-form-field>
+          <mat-form-field
+            ><mat-label>End time (optional)</mat-label
+            ><input matInput type="time" formControlName="endTime"
           /></mat-form-field>
         </div>
+        @if (form.touched && form.errors?.['schedule']) {
+          <p class="error" role="alert">{{ form.errors?.['schedule'] }}</p>
+        }
         <p class="muted">
           Times use your device timezone: {{ timezone }}. Tasks leave the feed when the start time
           passes.
@@ -79,26 +180,38 @@ export class TaskForm {
   file?: File;
   imageId?: string;
   timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  form = inject(FormBuilder).nonNullable.group({
-    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-    description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(3000)]],
-    location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(160)]],
-    startAt: ['', Validators.required],
-    endAt: [''],
-  });
+  form = inject(FormBuilder).nonNullable.group(
+    {
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      description: [
+        '',
+        [Validators.required, Validators.minLength(10), Validators.maxLength(3000)],
+      ],
+      location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(160)]],
+      startDate: [null as Date | null, Validators.required],
+      startTime: ['', Validators.required],
+      endDate: [null as Date | null],
+      endTime: [''],
+    },
+    { validators: schedule },
+  );
   constructor() {
     if (this.id)
       void this.api
         .get<Task>(`tasks/${this.id}`)
         .then((t) => {
-          const local = (v: string) => {
-            const d = new Date(v);
-            return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-          };
+          const start = new Date(t.startAt),
+            end = t.endAt ? new Date(t.endAt) : null;
+          const time = (d: Date) =>
+            `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
           this.form.patchValue({
-            ...t,
-            startAt: local(t.startAt),
-            endAt: t.endAt ? local(t.endAt) : '',
+            title: t.title,
+            description: t.description,
+            location: t.location,
+            startDate: start,
+            startTime: time(start),
+            endDate: end,
+            endTime: end ? time(end) : '',
           });
           this.imageId = t.imageId;
         })
@@ -112,18 +225,23 @@ export class TaskForm {
     }
   }
   async submit() {
+    if (this.busy()) return;
+    this.form.updateValueAndValidity();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.busy.set(true);
     this.error.set('');
     try {
       const v = this.form.getRawValue();
-      if (new Date(v.startAt) <= new Date()) throw new Error('Choose a future start time.');
-      if (v.endAt && new Date(v.endAt) <= new Date(v.startAt))
-        throw new Error('End time must follow start time.');
       if (this.file) this.imageId = (await this.api.upload(this.file, 'TASK')).id;
       const dto = {
-        ...v,
-        startAt: new Date(v.startAt).toISOString(),
-        endAt: v.endAt ? new Date(v.endAt).toISOString() : undefined,
+        title: v.title,
+        description: v.description,
+        location: v.location,
+        startAt: timestamp(v.startDate, v.startTime)!.toISOString(),
+        endAt: v.endDate ? timestamp(v.endDate, v.endTime)!.toISOString() : undefined,
         imageId: this.imageId,
       };
       const task = this.id

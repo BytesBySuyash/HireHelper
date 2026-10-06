@@ -173,6 +173,7 @@ export class TaskDetail {
     }
   }
   async run(fn: () => Promise<unknown>) {
+    if (this.busy()) return;
     this.busy.set(true);
     this.error.set('');
     try {
