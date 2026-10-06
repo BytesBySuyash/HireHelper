@@ -273,7 +273,7 @@ sequenceDiagram
 
 The API takes the owner identity from the session. Clients cannot choose an arbitrary owner by submitting a `userId` or `ownerId` override.
 
-Forms display a `datetime-local` value in the device's timezone and convert it to an ISO timestamp with timezone before submission. The API rejects past starts, ambiguous timestamps and end times at/before the start.
+Forms use separate Material date and time pickers. Calendar buttons select dates; clock buttons offer 15-minute time options. Typed `DD/MM/YYYY` and `HH:mm` values remain supported. Submission combines the selected local date/time and converts it to an ISO timestamp with timezone. The API rejects past starts, ambiguous timestamps and end times at/before the start.
 
 ## 7. Authentication and account security
 
@@ -487,7 +487,7 @@ In Pages mode:
 - State key: `hirehelper:pages-demo:v1` in localStorage.
 - Selected-person key: `hirehelper:pages-demo:user` in sessionStorage.
 - Initial state: Mira Patel, Theo Shah, Sam Roy, six future tasks and Theo's pending garden offer to Mira.
-- Dates are generated at initial seeding. If old sample tasks disappear from Feed because their starts passed, Reset demo refreshes the seed dates.
+- Dates are generated relative to initial seeding. Refresh expired sample dates updates only expired OPEN sample listings; it preserves visitor tasks and active assignments. Reset demo explicitly restores the whole fictional example.
 - Reset clears this application's demo state/selection and reinitializes the samples; it does not remove the full application's database or other browser applications' keys.
 - Images, profile edits, offers and tasks persist through reload in the same browser origin. They are not transferable to another visitor or the real backend.
 - There is no offline service worker. Interactions are local after the app loads, but loading/reloading the hosted assets can still need network access.

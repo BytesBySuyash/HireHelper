@@ -7,14 +7,19 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
 }) => {
   const apiRequests: string[] = [];
   const errors: string[] = [];
+  const eventSources: string[] = [];
+  await page.exposeFunction('reportDemoEventSource', (url: string) => eventSources.push(url));
   page.on('request', (r) => {
-    if (new URL(r.url()).pathname.startsWith('/api/')) apiRequests.push(r.url());
+    if (/^\/api(?:\/|$)/.test(new URL(r.url()).pathname)) apiRequests.push(r.url());
   });
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => {
     Object.defineProperty(window, 'EventSource', {
       value: class {
-        constructor() {
+        constructor(url: string) {
+          void (
+            window as unknown as { reportDemoEventSource: (url: string) => Promise<void> }
+          ).reportDemoEventSource(url);
           throw new Error('Unexpected EventSource connection');
         }
       },
@@ -24,6 +29,7 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
   await expect(page.getByRole('heading', { name: /Post a task. Find a helper./ })).toBeVisible();
   await page.getByRole('button', { name: 'Explore as Mira' }).click();
   await expect(page.getByRole('heading', { name: /Hello, Mira/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Notifications', exact: true })).toContainText('1');
   await page.getByRole('link', { name: 'Add Task', exact: true }).click();
   const title = 'Pages demo bookshelf task';
   await page.getByLabel('Task title').fill(title);
@@ -58,6 +64,7 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
   await page.getByRole('button', { name: 'Offer to help' }).click();
   await expect(page.getByText('Your request:')).toBeVisible();
   await page.getByLabel('Demo account').selectOption('mira');
+  await expect(page.getByRole('button', { name: 'Notifications', exact: true })).toContainText('2');
   await page.getByRole('link', { name: 'Requests', exact: true }).click();
   const request = page.locator('.request-card').filter({ hasText: title });
   page.once('dialog', (dialog) => dialog.accept());
@@ -113,6 +120,7 @@ test('Pages demo runs without API calls: image, owner/helper lifecycle, persiste
   await page.getByRole('button', { name: 'Explore as Mira' }).click();
   await page.goto('./#/my-tasks');
   await expect(page.getByRole('link', { name: title, exact: true })).toHaveCount(0);
+  expect(eventSources).toEqual([]);
   expect(apiRequests).toEqual([]);
   expect(errors).toEqual([]);
 });
