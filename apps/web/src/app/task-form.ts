@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTimepickerModule } from '@angular/material/timepicker';
 import {
   DateAdapter,
   NativeDateAdapter,
@@ -29,14 +30,16 @@ class TaskDateAdapter extends NativeDateAdapter {
       : new Date(NaN);
   }
 }
-function timestamp(date: Date | null, time: string): Date | null {
+function timestamp(date: Date | null, time: Date | null): Date | null {
   if (
     !(date instanceof Date) ||
     !Number.isFinite(date.getTime()) ||
-    !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    !(time instanceof Date) ||
+    !Number.isFinite(time.getTime())
   )
     return null;
-  const [hours, minutes] = time.split(':').map(Number);
+  const hours = time.getHours(),
+    minutes = time.getMinutes();
   const value = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hours, minutes);
   // Reject a nonexistent local time during a daylight-saving transition.
   return value.getHours() === hours && value.getMinutes() === minutes ? value : null;
@@ -62,6 +65,7 @@ function schedule(control: AbstractControl) {
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
+    MatTimepickerModule,
   ],
   providers: [
     { provide: DateAdapter, useClass: TaskDateAdapter },
@@ -69,8 +73,10 @@ function schedule(control: AbstractControl) {
     {
       provide: MAT_DATE_FORMATS,
       useValue: {
-        parse: { dateInput: null },
+        parse: { dateInput: null, timeInput: null },
         display: {
+          timeInput: { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
+          timeOptionLabel: { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' },
           dateInput: { day: '2-digit', month: '2-digit', year: 'numeric' },
           monthYearLabel: { month: 'short', year: 'numeric' },
           dateA11yLabel: { dateStyle: 'full' },
@@ -122,9 +128,25 @@ function schedule(control: AbstractControl) {
           </mat-form-field>
           <mat-form-field
             ><mat-label>Start time</mat-label
-            ><input matInput type="time" formControlName="startTime" /><mat-error
-              >Enter a start time.</mat-error
-            ></mat-form-field
+            ><input
+              matInput
+              [matTimepicker]="startTimePicker"
+              [matTimepickerOpenOnClick]="false"
+              formControlName="startTime"
+              placeholder="HH:mm"
+            />
+            <mat-timepicker-toggle
+              matIconSuffix
+              [for]="startTimePicker"
+              aria-label="Choose start time"
+            ></mat-timepicker-toggle>
+            <mat-timepicker
+              #startTimePicker
+              interval="15m"
+              aria-label="Start time options"
+            ></mat-timepicker>
+            <mat-hint>HH:mm or use the clock button.</mat-hint
+            ><mat-error>Enter a start time.</mat-error></mat-form-field
           >
         </div>
         <div class="form-row">
@@ -142,8 +164,26 @@ function schedule(control: AbstractControl) {
           </mat-form-field>
           <mat-form-field
             ><mat-label>End time (optional)</mat-label
-            ><input matInput type="time" formControlName="endTime"
-          /></mat-form-field>
+            ><input
+              matInput
+              [matTimepicker]="endTimePicker"
+              [matTimepickerOpenOnClick]="false"
+              formControlName="endTime"
+              placeholder="HH:mm"
+            />
+            <mat-timepicker-toggle
+              matIconSuffix
+              [for]="endTimePicker"
+              aria-label="Choose end time"
+            ></mat-timepicker-toggle>
+            <mat-timepicker
+              #endTimePicker
+              interval="15m"
+              aria-label="End time options"
+            ></mat-timepicker>
+            <mat-hint>HH:mm or use the clock button.</mat-hint
+            ><mat-error>Enter a valid time as HH:mm.</mat-error></mat-form-field
+          >
         </div>
         @if (form.touched && form.errors?.['schedule']) {
           <p class="error" role="alert">{{ form.errors?.['schedule'] }}</p>
@@ -189,9 +229,9 @@ export class TaskForm {
       ],
       location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(160)]],
       startDate: [null as Date | null, Validators.required],
-      startTime: ['', Validators.required],
+      startTime: [null as Date | null, Validators.required],
       endDate: [null as Date | null],
-      endTime: [''],
+      endTime: [null as Date | null],
     },
     { validators: schedule },
   );
@@ -202,16 +242,14 @@ export class TaskForm {
         .then((t) => {
           const start = new Date(t.startAt),
             end = t.endAt ? new Date(t.endAt) : null;
-          const time = (d: Date) =>
-            `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
           this.form.patchValue({
             title: t.title,
             description: t.description,
             location: t.location,
             startDate: start,
-            startTime: time(start),
+            startTime: start,
             endDate: end,
-            endTime: end ? time(end) : '',
+            endTime: end,
           });
           this.imageId = t.imageId;
         })

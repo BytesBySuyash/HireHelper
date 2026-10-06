@@ -35,7 +35,13 @@ test('calendar and typed dates validate and survive editing in device timezone',
   await expect(page.getByRole('button', { name: 'Publish task' })).toBeDisabled();
   await page.getByLabel('End time (optional)', { exact: true }).fill('09:30');
   await expect(page.getByRole('button', { name: 'Publish task' })).toBeDisabled();
-  await page.getByLabel('End time (optional)', { exact: true }).fill('11:30');
+  await page.getByRole('button', { name: 'Choose start time', exact: true }).click();
+  await expect(page.getByRole('listbox', { name: 'Start time options' })).toBeVisible();
+  await page.getByRole('option', { name: '10:30', exact: true }).click();
+  await expect(page.getByLabel('Start time', { exact: true })).toHaveValue('10:30');
+  await page.getByRole('button', { name: 'Choose end time', exact: true }).click();
+  await page.getByRole('option', { name: '11:30', exact: true }).click();
+  await expect(page.getByLabel('End time (optional)', { exact: true })).toHaveValue('11:30');
   await page.getByRole('button', { name: 'Publish task' }).click();
   await expect(page.getByRole('heading', { name: 'Calendar task', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Edit task', exact: true }).click();

@@ -21,6 +21,8 @@ npm run preview:vercel
 
 Open http://localhost:4202/#/login. Choose **Try demo** to enter as Mira. Show the walkthrough, accept Theo's prepared garden offer under Requests, switch to Theo, start work and request completion, then switch to Mira to confirm. You can also post a task, search the feed, upload a local image, inspect notifications and edit a fictional profile. Reset demo restores the prepared example after confirmation.
 
+On Post a task, use the calendar buttons to choose dates and the clock buttons to choose start/end times. Dates can also be typed as `DD/MM/YYYY` and times as `HH:mm`. Time lists use 15-minute steps; typing allows any valid minute. The device timezone is shown beside the form.
+
 ## Two modes
 
 | | Static portfolio demo | Full application, run locally |

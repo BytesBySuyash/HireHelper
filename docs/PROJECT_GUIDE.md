@@ -1,6 +1,6 @@
 # HireHelper — complete project guide
 
-Current deployment update: **Vercel is the primary static demo target; Pages is optional and manual.** See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings. Both use the browser adapter and hash routes; the full backend remains local. CI now builds both static targets and tests the Vercel artifact. Date entry uses separate calendar and time controls. Demo recovery preserves unreadable saved data until explicit reset, labels memory fallback, and offers explicit refresh of expired open sample dates. Older Pages-specific descriptions below describe that secondary target.
+Current deployment update: **Vercel is the primary static demo target; Pages is optional and manual.** See [DEPLOYMENT.md](DEPLOYMENT.md) for exact settings. Both use the browser adapter and hash routes; the full backend remains local. CI now builds both static targets and tests the Vercel artifact. Date entry uses separate calendars and visible Material clock pickers. Demo recovery preserves unreadable saved data until explicit reset, labels memory fallback, and offers explicit refresh of expired open sample dates. Older Pages-specific descriptions below describe that secondary target.
 
 Documentation reviewed against the current source on **6 October 2026**.
 
@@ -645,7 +645,7 @@ The npm `private: true` field prevents accidental npm package publication; it do
 
 ## 17. Testing and evidence
 
-The Vercel/date update passed nine production-demo browser scenarios locally: calendar/typed date validation and edit round trips, full owner/helper workflow, local images/profile persistence, isolated visitors, reset, malformed/old saved data, labelled memory fallback, quota preservation, expired sample refresh and guided garden completion. The main scenario asserts zero API requests, no EventSource connections and no page errors. Actual form/calendar checks fit 360/768/1440 widths and missing scripts returned 404. Two real Docker browser scenarios also passed against the updated frontend: OTP/task/image/lifecycle/notifications/responsive reloads, and pre-OTP/wrong-code/CSRF rejection. Source lint/type checks, normal builds, four backend units and both static artifact checks passed. Hosted CI and public deployment are still unverified.
+The Vercel/date update passed nine production-demo browser scenarios locally: calendar/typed date validation, selectable start/end times and edit round trips, full owner/helper workflow, local images/profile persistence, isolated visitors, reset, malformed/old saved data, labelled memory fallback, quota preservation, expired sample refresh and guided garden completion. The main scenario asserts zero API requests, no EventSource connections and no page errors. Actual form/calendar checks fit 360/768/1440 widths and missing scripts returned 404. Two real Docker browser scenarios also passed against the updated frontend: OTP/task/image/lifecycle/notifications/responsive reloads, and pre-OTP/wrong-code/CSRF rejection. Source lint/type checks, normal builds, four backend units and both static artifact checks passed. Hosted CI and public deployment are still unverified.
 
 
 ### Commands
