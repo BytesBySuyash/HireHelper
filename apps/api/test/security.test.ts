@@ -1,11 +1,6 @@
 import 'reflect-metadata';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-// Configuration remains local and isolated; test keys are never accepted in production.
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/hirehelper_test';
-process.env.SESSION_SECRET = 'test-only-session-secret-at-least-32-characters';
-process.env.OTP_SECRET = 'test-only-otp-secret-at-least-32-characters';
-process.env.APP_ORIGIN = 'http://localhost:4200';
 import { CsrfGuard, digest, same } from '../src/security';
 import { Tasks } from '../src/tasks';
 import { Events } from '../src/events';

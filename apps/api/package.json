@@ -10,7 +10,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "seed": "tsx prisma/seed.ts",
-    "test": "tsx --test test/security.test.ts"
+    "test": "tsx --import ./test/setup.ts --test test/security.test.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.2.7",
