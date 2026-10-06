@@ -33,6 +33,8 @@ Run `remote add` only when `origin` is absent. If an existing remote points else
 
 Suggested description: “Task assistance application with an Angular portfolio demo and a NestJS/PostgreSQL backend.” Suggested topics: `angular`, `nestjs`, `postgresql`, `prisma`, `typescript`, `portfolio`, `task-management`.
 
+Local preparation was verified with lint/type checks, normal builds, backend units, both static builds/artifact checks, nine demo browser scenarios and two real Docker browser scenarios. A clean tracked-only Linux Node 24 install and final Vercel build passed without local secrets or helpers. These checks do not verify the future hosted domain or GitHub Actions run.
+
 ## Import into Vercel
 
 Create a free personal Vercel account, sign in with GitHub and authorize access to this repository. Select Add New → Project → Import `hirehelper`. This is the one hosting account needed; no Neon, Render, Gmail or Cloudinary account is required for the static demo.

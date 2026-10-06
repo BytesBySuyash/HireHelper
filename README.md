@@ -59,6 +59,7 @@ npm run lint
 npm run typecheck
 npm run build
 npm test
+npm audit --audit-level=high
 npm run build:vercel
 npm run check:vercel
 npx playwright install chromium
