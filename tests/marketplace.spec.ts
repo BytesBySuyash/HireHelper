@@ -42,7 +42,7 @@ async function post(context: BrowserContext, path: string, data: unknown = {}) {
 }
 test('real owner/helper flow, task image, notifications, lifecycle and responsive reloads', async ({
   browser,
-}) => {
+}, testInfo) => {
   const owner = await browser.newContext(),
     helper = await browser.newContext();
   const suffix = randomUUID().slice(0, 8);
@@ -112,7 +112,7 @@ test('real owner/helper flow, task image, notifications, lifecycle and responsiv
     expect(
       await a.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBeTruthy();
-    await a.screenshot({ path: `docs/screenshots/feed-${width}.png`, fullPage: true });
+    await a.screenshot({ path: testInfo.outputPath(`feed-${width}.png`), fullPage: true });
   }
   expect((await post(helper, `tasks/${taskId}/cancel`)).status()).toBe(403);
   // Expiring a database session must remove access after a deep-link reload.

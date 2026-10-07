@@ -4,26 +4,26 @@
 
 > The hosted portfolio demo is not published yet. The static demo runs locally with fictional sample data; the full application runs locally with its API and database.
 
-## Screens from the demo
+## Desktop screens from the demo
 
-The screenshots show the app at desktop and narrow screen sizes. Names and tasks are fictional sample data.
+These screenshots show the app at desktop size. Names and tasks are fictional sample data.
 
 <table>
   <tr>
     <th>Community task feed</th>
-    <th>Demo workspace</th>
+    <th>Task detail</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/feed-1440.png" alt="HireHelper community task feed on desktop" width="500"></td>
-    <td><img src="docs/screenshots/demo-desktop.png" alt="HireHelper demo workspace on desktop" width="500"></td>
+    <td><img src="docs/screenshots/feed-desktop.png" alt="HireHelper community task feed on desktop" width="500"></td>
+    <td><img src="docs/screenshots/task-detail-desktop.png" alt="HireHelper task detail on desktop" width="500"></td>
   </tr>
   <tr>
-    <th>Task feed at tablet width</th>
-    <th>Create a task on mobile</th>
+    <th>Requests received</th>
+    <th>Create a task</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/feed-768.png" alt="HireHelper task feed at tablet width" width="250"></td>
-    <td><img src="docs/screenshots/demo-date-mobile.png" alt="HireHelper task creation form on mobile" width="250"></td>
+    <td><img src="docs/screenshots/requests-desktop.png" alt="HireHelper incoming help requests on desktop" width="500"></td>
+    <td><img src="docs/screenshots/create-task-desktop.png" alt="HireHelper task creation form on desktop" width="500"></td>
   </tr>
 </table>
 
