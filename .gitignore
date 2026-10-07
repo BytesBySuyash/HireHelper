@@ -14,10 +14,3 @@ test-results/
 uploads-backup/
 client_secret*.json
 gmail-oauth*.json
-
-# Local recovery records are preserved on disk, outside the public source.
-CODEX_PROGRESS.md
-TODO.md
-docs/BUILD_PROGRESS.md
-docs/NEW_CHAT_HANDOFF.md
-docs/RECOVERY_PROTOCOL.txt

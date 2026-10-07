@@ -1,84 +1,23 @@
-# Complete Codex build prompt: HireHelper
+# Product scope
 
-Act as a senior full-stack engineer and build a complete, working, portfolio-quality application from scratch in the current repository. Implement and validate the software; do not stop at a plan, scaffolding, static screens, or mocked business logic. Read existing AGENTS.md instructions first. Preserve unrelated files. Use milestones and maintain a progress/checkpoint document so work can resume across sessions. Resolve ordinary implementation choices independently. Never claim tests passed unless executed. If blocked, record the exact blocker and resume all independent work.
+HireHelper is an on-demand task assistance marketplace. Any member can post a task and offer help on another member’s task; account roles are not fixed. The application is an independently rebuilt portfolio project based on an internship brief.
 
-## Context and scope
-I completed an Infosys internship in the Angular Full Stack stream, covering Front End Web Developer and Angular Web Developer tracks. This is an independently rebuilt implementation of the HireHelper internship brief, intended for my portfolio. Do not claim Infosys endorsement or invent internship achievements.
+## Main features
 
-HireHelper is an on-demand task assistance marketplace. A registered person can post a task and can also offer help on other people's tasks. There are no permanent separate customer/helper roles. The original brief requires registration/login with email OTP, a dashboard/sidebar, Feed, My Tasks, Requests received, My Requests sent, Add Task, Settings, task images, profile updates, and in-app notifications. Implement these requirements plus the explicitly defined lifecycle below. No payments, AI APIs, Google Maps, SMS, social authentication, chat, microservices, or mandatory hosted services. A location is text. A phone field does not imply phone verification. No third-party keys are required to run locally.
+- Register and sign in with email verification codes; recover accounts and manage profile details.
+- Browse, search and filter open tasks; create tasks with location, schedule and optional image.
+- Request to help with a task; owners can review requests and choose one helper.
+- Track assigned work through start, completion request and owner confirmation. Owners can return a completion request with a reason or cancel before work starts.
+- Receive in-app notifications for relevant task and request updates.
 
-## Technology and structure
-Use Angular with TypeScript, standalone components, Angular Router, lazy-loaded feature routes, Reactive Forms, HttpClient, RxJS and signals where useful; Angular Material with SCSS for a coherent responsive UI. Do not substitute React, Next.js, or a plain static website.
-Use Node.js with NestJS and TypeScript for the REST backend; PostgreSQL with Prisma migrations; Nodemailer with local Mailpit for OTP email; local persistent file storage for uploads; authenticated server-sent events for notifications. NestJS is an implementation choice, not an inferred internship requirement.
-Check current official compatibility documents and choose mutually compatible supported stable Angular/CLI/Material/Node/TypeScript/NestJS/Prisma versions. Pin the chosen versions, commit a lockfile, and record versions and the reason for choices. Do not mix majors or copy obsolete Prisma configuration. Use ordinary npm workspaces if practical: apps/web, apps/api, docs, scripts, compose.yaml. Avoid unnecessary framework layers and global state libraries.
+The task lifecycle is `OPEN → ASSIGNED → IN_PROGRESS → COMPLETION_PENDING → COMPLETED`. A task can have at most one assigned helper. Permissions are checked by the API, and assignment is protected by database constraints and a transaction.
 
-## Local startup and credentials
-Provide a tested Docker Compose path that runs web, API, PostgreSQL and Mailpit with persistent volumes. Include a native Node development path using containerized PostgreSQL/Mailpit. Use Docker Compose v2; document Windows PowerShell as well as Unix commands. Bind database and Mailpit development ports to loopback. Use service hostnames inside containers and localhost for host-run services.
-Provide .env.example and setup scripts that create ignored local .env files only when absent, generate cryptographically random session/OTP secrets and local DB passwords, and do not overwrite user configuration. Do not commit secrets or print production secrets. Explain every variable and exactly where to enter it. Keep backend secrets out of Angular environment files and builds. Use a same-origin /api proxy in development and deployed web server to simplify cookies and SSE. Configure ports with sensible documented defaults: web 4200, API 3000, PostgreSQL 5432, Mailpit inbox 8025, SMTP 1025.
-Local email uses Mailpit without username/password, provider signup, or API key. Clearly label it a test inbox: messages are captured locally, not delivered to Gmail or other public inboxes. Document optional real SMTP host, port, TLS mode, username, password/app password and sender address without requiring it. In production disable Mailpit and demo seeding; validate real SMTP and safe cookie configuration before accepting real users. Do not promise free public hosting. Do not publish or create external accounts as part of this build.
+## Local application
 
-## Authentication and profile
-Implement registration with first name, last name, normalized unique email, password/confirmation and optional phone; login with email/password followed by OTP on every new login, as well as verification on registration. Registration verification may establish the initial session. Dashboard access requires a fully authenticated session. Password verification alone must never create that session.
-Hash passwords with Argon2id. Generate cryptographically random six-digit OTPs; store a keyed hash bound to challenge ID, purpose and user, never plaintext. OTP challenges expire after five minutes, allow at most five attempts, and enforce a 60-second resend cooldown plus per-IP and per-account rate limits. A resend invalidates prior codes. Consume challenges atomically once, enforce expiration server-side, and avoid revealing whether an email exists. The verification UI handles incorrect, expired and throttled codes clearly.
-Use opaque server-side sessions stored as hashes in PostgreSQL; HttpOnly SameSite cookies, Secure under HTTPS, expiry, revocation and session rotation after authentication. Protect state-changing requests with CSRF tokens and origin checks; document local versus HTTPS behavior. Authentication guards on the backend are mandatory; Angular guards are only navigation assistance. On logout revoke the session and close event streams.
-Implement forgot/reset password through OTP and a short-lived purpose-bound reset authorization; it cannot become a login session. Reset revokes existing sessions. Allow password changes after verifying the current password. Settings supports name, optional phone, avatar and email changes. For email change require current-password confirmation and verify the new address before replacing the old address; preserve uniqueness and revoke other sessions on completion. Do not expose passwords, password hashes, OTPs, session hashes, or private email/phone in public user DTOs. Show participant contact details only after assignment and only to the owner and assigned helper.
+The full application uses Angular and NestJS with PostgreSQL and Prisma. Local email is captured by Mailpit, and task images are stored on disk. Authentication uses Argon2id password hashes, one-time email codes, revocable cookie sessions, CSRF tokens and origin checks. See [Architecture](ARCHITECTURE.md) for implementation details and [Project guide](PROJECT_GUIDE.md) for setup.
 
-## Screens and UX
-Auth screens: register, login, OTP verification, forgot/reset password. Authenticated app shell: collapsible desktop sidebar, mobile drawer, top bar, notification bell/unread count and user menu. Sidebar: Feed, My Tasks, Requests, My Requests, Add Task, Settings. Add task detail and assigned-task detail views, either routed from those screens or an Assigned to Me tab in My Requests. Provide useful dashboard counts derived from real queries.
-Feed displays open, future, non-expired tasks from other users; text search, text location filter, sorting and server pagination. The backend rejects requests on expired tasks even if the UI is stale. Task detail can remain visible to participants after a task leaves the feed. My Tasks includes the owner's active, completed and cancelled tasks. Requests is incoming requests on the owner's tasks; My Requests is outgoing requests and assigned work. Distinguish these labels and empty states.
-Cards show task title, description excerpt, text location, date/time, status and optional image with local fallback. Creation fields: title, description, location, start time, optional end time and optional picture. Store timestamps in UTC and display in the user's timezone; validate future start on creation and end later than start. Use meaningful constraints and consistent client/server errors. Profile image uploads and task images must work end to end.
-Use a polished original layout inspired by the brief's sidebar/card structure, without copying brand assets or introducing unrelated features. Include accessible labels, keyboard focus, semantic elements, adequate contrast, mobile layout, loading skeletons, validation, retry/error states, confirmation dialogs and notifications. Disable duplicate actions during requests. Handle deep-link reloads and auth expiry. Bundle assets locally; do not depend on remote placeholder images or CDN fonts.
+The static portfolio demo uses fictional sample members and browser-local data. It does not connect to the API, send email or share data between visitors. Build-time replacement selects the static adapter; the ordinary web build uses the API.
 
-## Domain rules and state transitions
-The explicit interpretation is one assigned helper per task.
-Task states: OPEN -> ASSIGNED -> IN_PROGRESS -> COMPLETION_PENDING -> COMPLETED; OPEN or ASSIGNED -> CANCELLED. Helper may start only an assigned task and request completion only on an in-progress task. Owner confirms completion; owner may return a completion-pending task to in-progress with a reason. Completed/cancelled are terminal. Cancellation after work begins is outside this version; enforce and explain it. Owner may edit descriptive fields/schedule or delete only an OPEN task with no requests; otherwise preserve request history and permit cancellation where allowed.
-Request states: PENDING -> ACCEPTED or REJECTED or WITHDRAWN; accepted requests remain historical acceptance records. Assignment has its own lifecycle and becomes cancelled if its task is cancelled. A user cannot request their own task, request a closed/expired task, or submit a duplicate. Enforce a unique(task_id, requester_id) pair; a withdrawn/rejected request cannot be resubmitted in this version. Pending requests may be withdrawn only by the requester. Owners may reject pending requests for their tasks only. Accepting one request sets the task to ASSIGNED, creates exactly one assignment, accepts that request and rejects all other pending requests in one database transaction. Cancellation also closes pending requests and the existing assignment if any, with notifications.
-Prevent concurrent owners' acceptance calls from selecting two helpers. Use a task row lock or conditional state update plus a unique task assignment constraint and appropriate transaction isolation/retry handling. Test concurrency against real PostgreSQL. Return HTTP 409 for conflicting state/duplicates; 401 for no authentication; 403 for forbidden ownership; 400 for invalid inputs; avoid private-resource leakage. Never trust user_id from the client: use the authenticated session identity. Enforce authorization on every task/request/assignment/upload/notification operation.
+## Deliberate limits
 
-## Persistence model
-Create normalized migrations with UUID keys, timestamps, foreign keys, enums, appropriate indexes, and explicit deletion behavior:
-- User: identity/name/email/phone/passwordHash/avatarId/emailVerifiedAt/timestamps.
-- OtpChallenge: user or pending-registration reference, purpose, keyed code hash, expiry, attempts, consumedAt, resend controls.
-- Session: userId, tokenHash, expiry and revocation.
-- Task: ownerId, title, description, location, startAt, optional endAt/imageId, status, timestamps/version if used.
-- TaskRequest: taskId, requesterId, optional message, status, timestamps and unique pair.
-- TaskAssignment: unique taskId, helperId, acceptedRequestId, lifecycle timestamps/status; retain one assignment per task because reassignment is outside this scope.
-- Notification: recipientId, type, body, task/request references, readAt, createdAt.
-- UploadedFile: ownerId, server-generated filename/storage path, MIME, size, intended use and timestamps.
-If helpful use a persistent notification outbox; otherwise persist notifications in the same business transaction, publish SSE only after commit and reconcile via database fetch after reconnect. Avoid duplicated task/request state stored in inconsistent tables. The brief's AcceptedTasks table should be represented by TaskAssignment, not a second list maintained manually.
-
-## API and files
-Provide documented /api/v1 REST endpoints for auth/challenges/sessions/profile, paginated feed and task CRUD, received/sent requests, accept/reject/withdraw, task transitions, upload/download, notification list/unread/read operations and authenticated events stream. Use Swagger/OpenAPI and typed frontend clients/interfaces; validate DTOs, bound pagination and enforce consistent error envelopes. Add a health/readiness endpoint; readiness checks database access.
-Upload JPEG/PNG/WebP only, maximum 5 MiB, verify content using signature/image decoding rather than trusting extension/MIME, reject SVG and executable/polyglot hazards, strip metadata/re-encode when practical, randomize names and prevent traversal. Keep bytes outside executable/public source directories and persist them across restarts. Enforce upload ownership when attaching files. Public feed images must be intentionally public and sanitized; avatars/task media should not reveal private paths. Clean up unattached uploads safely. Do not leak absolute disk paths.
-Authenticated SSE sends only the recipient's events, with heartbeat, connection cleanup and reconnect logic. Use same-origin cookies, never tokens in query strings. Persist notifications first; on initial connect/reconnect fetch current notifications and counts so missed events are recoverable. Refresh relevant views after domain events. This single API instance architecture does not claim multi-instance real-time delivery. No third-party notification service is needed.
-
-## Seed and demo
-Create opt-in, idempotent development seeding with at least three fictional users and varied tasks/requests across all states, enough to demonstrate search and pagination. Generate dates relative to seed time so open tasks are usable. Include both pending-OTP and verified examples where practical. Supply documented local demo passwords only, with conspicuous development-only labeling. Do not bypass OTP for demo logins: reviewers can use Mailpit. No real personal information, remote stock images, or hardcoded production accounts. Provide an explicit guarded reset script that warns about data deletion; do not automatically delete persistent volumes.
-
-## Build order
-1. Workspace, compatible pinned dependencies, compose, configuration validation, migrations and seed.
-2. Registration/login/OTP/session/profile and frontend app shell.
-3. Task creation/images/feed/detail/My Tasks.
-4. Incoming/outgoing requests, transactional acceptance and lifecycle.
-5. Persisted notifications, SSE and settings/password/email flows.
-6. Accessibility/mobile polish, security checks, automated testing and documentation.
-Keep each milestone working. Maintain docs/BUILD_PROGRESS.md with completed work, commands actually run, failures, remaining items and next steps. Do not stop after one milestone unless execution is genuinely blocked.
-
-## Verification and acceptance criteria
-Run lint, type checking and production builds for both apps. Test services and backend integration with real test PostgreSQL; use Playwright for browser flows. Isolate test database/volumes from development data. Cover at minimum:
-- Registration and email receipt through Mailpit, wrong/expired OTP, attempt limits, resend cooldown, one-time consumption and login OTP.
-- No dashboard/API access before completed auth; logout revocation; CSRF/ownership/recipient isolation.
-- Valid/invalid task creation, UTC display, optional image upload and malicious upload rejection.
-- Feed search/filter/pagination; exclusion of own/closed/expired tasks.
-- Self-request/duplicate-request prevention and pending withdrawal.
-- Owner receipt and helper acceptance/rejection notification persistence.
-- Concurrent acceptance of two helpers resulting in exactly one assignment.
-- Assigned helper start/completion request, owner confirmation/return to progress, forbidden transitions, cancellation propagation.
-- Profile/avatar persistence, pending email change, password reset/session revocation.
-- SSE recipient isolation, disconnect/reconnect reconciliation and unread counts.
-- Persistence after service restart; responsive screens at approximately 360, 768 and 1440 pixels; deep-link reload and auth expiry.
-Use separate browser contexts for owner/helper. Obtain test OTPs from Mailpit's testing API, never expose them through production auth endpoints. Fix failures and rerun affected checks. If tools/dependencies cannot run, state exactly what remains unverified instead of inventing results.
-
-## Deliverables
-Deliver the complete repository, source, migrations, lockfiles, .env.example, compose configuration, startup/config scripts, tests, local assets and documentation. README must include exact Windows/Linux commands, prerequisites, ports, manual credentials/configuration, Mailpit explanation, demo walkthrough, reset/backup instructions, and troubleshooting for occupied ports, Docker/WSL, DB availability, migration errors, cookies, SMTP and uploads. Include architecture and ER Mermaid diagrams, request lifecycle, endpoint reference, security choices, limitations and optional deployment checklist. Supply screenshots only from the running application. Include a short interview explanation of Angular features, authorization, transactions, OTP and notifications, and factual resume bullet templates without invented metrics.
-Final report: what was built, exact startup commands, demo flow, where OTPs are found, credentials/config I must enter, checks actually passed, remaining limitations. Do not describe a mock or untested scaffold as a completed app. Work until the defined local acceptance criteria are satisfied or clearly record genuine blockers.
+There are no payments, messaging, maps, phone verification, social sign-in or real public accounts. Locations are entered as text. The project does not claim Infosys endorsement, production use, user counts or performance results. A public full-stack deployment requires separately operated hosting, persistent storage, email delivery and operational safeguards.
