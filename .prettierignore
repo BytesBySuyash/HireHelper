@@ -4,7 +4,8 @@ node_modules
 **/.angular
 **/dist
 package-lock.json
-docs/REQUIREMENTS.md
-docs/RECOVERY_PROTOCOL.txt
-test-results
-uploads
+node_modules/
+**/dist/
+**/.angular/
+test-results/
+uploads/

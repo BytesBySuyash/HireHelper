@@ -4,17 +4,28 @@
 
 > The hosted portfolio demo is not published yet. The static demo runs locally with fictional sample data; the full application runs locally with its API and database.
 
-## See the app
+## Screens from the demo
 
-The screenshots below come from the project’s browser walkthroughs and show the responsive static demo.
+The screenshots show the app at desktop and narrow screen sizes. Names and tasks are fictional sample data.
 
-| Desktop feed | Tablet layout |
-| --- | --- |
-| ![HireHelper task feed on desktop](docs/screenshots/demo-desktop.png) | ![HireHelper task feed at tablet width](docs/screenshots/feed-768.png) |
-
-| Mobile feed | Create a task on mobile |
-| --- | --- |
-| ![HireHelper task feed on a narrow mobile screen](docs/screenshots/feed-360.png) | ![HireHelper task form on mobile](docs/screenshots/demo-date-mobile.png) |
+<table>
+  <tr>
+    <th>Community task feed</th>
+    <th>Demo workspace</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/feed-1440.png" alt="HireHelper community task feed on desktop" width="500"></td>
+    <td><img src="docs/screenshots/demo-desktop.png" alt="HireHelper demo workspace on desktop" width="500"></td>
+  </tr>
+  <tr>
+    <th>Task feed at tablet width</th>
+    <th>Create a task on mobile</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/feed-768.png" alt="HireHelper task feed at tablet width" width="250"></td>
+    <td><img src="docs/screenshots/demo-date-mobile.png" alt="HireHelper task creation form on mobile" width="250"></td>
+  </tr>
+</table>
 
 The demo includes a guided owner/helper walkthrough, task search, requests, notifications, profile editing and browser-local image uploads. **Try demo** opens as Mira. Accept Theo’s prepared offer from **Requests**, switch to Theo to start the task and request completion, then switch back to Mira to confirm it. Sample changes stay in the current browser and can be reset from the demo banner.
 
