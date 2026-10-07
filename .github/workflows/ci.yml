@@ -38,7 +38,7 @@ jobs:
       - name: Build and check Vercel demo
         run: npm run build:vercel && npm run check:vercel
       - name: Build and check optional Pages demo
-        run: npm run build:pages -- --base-href /hirehelper/ && node scripts/check-pages-build.mjs
+        run: npm run build:pages -- --base-href /HireHelper/ && node scripts/check-pages-build.mjs --base /HireHelper/
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Test production demo

@@ -38,11 +38,11 @@ The repository contains a **full-stack application** and a **static portfolio de
 | Full application | Implemented and previously validated locally with native services and Docker Compose |
 | Static demo | Vercel and optional Pages targets implemented; production browser checks passed locally |
 | Backend during static demo use | Not contacted; no API/database/email service is required |
-| Public repository | Intended owner is `BytesBySuyash`, intended repository is public `hirehelper`; this checkout has no Git remote configured at this review |
+| Public repository | `BytesBySuyash/HireHelper` |
 | Public demo deployment | Vercel configuration and manual Pages workflow exist; no hosted deployment or live URL has been verified |
-| Intended Pages URL | `https://bytesbysuyash.github.io/hirehelper/` after publishing and successful deployment; this is an expected address, not evidence of a live site |
+| Pages URL | `https://bytesbysuyash.github.io/HireHelper/` |
 | Local Vercel preview | `http://localhost:4202/#/login` while the preview server is running |
-| Local Pages preview | `http://localhost:4201/hirehelper/#/login` while the preview server is running |
+| Local Pages preview | `http://localhost:4201/HireHelper/#/login` while the preview server is running |
 | Local full application | `http://localhost:4200` while Compose or the native application is running |
 | License | Not selected by the owner yet |
 | Demo video | Planned for later |
@@ -480,7 +480,7 @@ In Pages mode:
 4. `Auth.connect()` subscribes to local change events instead of opening EventSource.
 5. Account-security controls in Settings are replaced with an explanation. Sample profile editing remains available.
 6. `Api.image()` returns saved data URLs or the base-relative fallback SVG.
-7. Hash routing creates addresses such as `/hirehelper/#/tasks/sample-1`, so refreshes request the existing static directory instead of a nonexistent server route.
+7. Hash routing creates addresses such as `/HireHelper/#/tasks/sample-1`, so refreshes request the existing static directory instead of a nonexistent server route.
 
 ### Storage and sample data
 
@@ -580,12 +580,12 @@ Open `http://localhost:4202/#/login`. Output is `apps/web/dist/vercel/browser`. 
 
 ```powershell
 npm ci
-npm run build:pages -- --base-href /hirehelper/
+npm run build:pages -- --base-href /HireHelper/
 node scripts/check-pages-build.mjs
 npm run preview:pages
 ```
 
-Open `http://localhost:4201/hirehelper/#/login`. No `.env`, database, Mailpit or Docker is required for this demo. Output is `apps/web/dist/pages/browser`; the preview serves that exact static artifact on loopback.
+Open `http://localhost:4201/HireHelper/#/login`. No `.env`, database, Mailpit or Docker is required for this demo. Output is `apps/web/dist/pages/browser`; the preview serves that exact static artifact on loopback.
 
 If `node` resolves to an unsupported global version, use Node 24. The supported runtime is required on PATH for ordinary npm commands.
 
@@ -662,7 +662,7 @@ Full browser tests use isolated test PostgreSQL/Mailpit, not production data. Se
 Pages checks:
 
 ```powershell
-npm run build:pages -- --base-href /hirehelper/
+npm run build:pages -- --base-href /HireHelper/
 node scripts/check-pages-build.mjs
 npx playwright test --config pages.playwright.config.ts
 ```

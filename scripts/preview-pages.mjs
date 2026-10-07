@@ -5,7 +5,7 @@ import { resolve, extname, sep } from 'node:path';
 
 const vercel = process.argv.includes('--vercel');
 const root = resolve(`apps/web/dist/${vercel ? 'vercel' : 'pages'}/browser`);
-const base = process.env.PAGES_BASE_PATH || (vercel ? '/' : '/hirehelper/');
+const base = process.env.PAGES_BASE_PATH || (vercel ? '/' : '/HireHelper/');
 const port = Number(process.env.PAGES_PREVIEW_PORT || (vercel ? 4202 : 4201));
 if (!/^\/(?:[a-zA-Z0-9_.-]+\/)*$/.test(base)) throw new Error('Invalid PAGES_BASE_PATH.');
 await stat(resolve(root, 'index.html'));

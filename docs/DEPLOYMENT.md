@@ -70,7 +70,7 @@ Review the staged diff before committing. If there are no changes, skip the comm
 
 ## Optional Pages deployment
 
-Pages remains a manual secondary target; pushing no longer automatically publishes it. See [Pages instructions](GITHUB_PAGES.md). Build it with `npm run build:pages -- --base-href /hirehelper/` and preview with `npm run preview:pages`. Its output is `apps/web/dist/pages/browser`. Its data is separate from the Vercel site's data.
+Pages remains a manual secondary target; pushing no longer automatically publishes it. See [Pages instructions](GITHUB_PAGES.md). Build it with `npm run build:pages -- --base-href /HireHelper/` and preview with `npm run preview:pages`. Its output is `apps/web/dist/pages/browser`. Its data is separate from the Vercel site's data.
 
 ## Portfolio wording
 

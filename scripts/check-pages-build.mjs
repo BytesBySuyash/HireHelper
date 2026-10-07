@@ -2,9 +2,15 @@ import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 const vercel = process.argv.includes('--vercel');
+const baseArg = process.argv.findIndex((arg) => arg === '--base');
+const expectedBase = vercel ? '/' : baseArg >= 0 ? process.argv[baseArg + 1] : '/HireHelper/';
+assert(expectedBase && /^\/(?:[a-zA-Z0-9_.-]+\/)*$/.test(expectedBase), 'Invalid expected base path');
 const root = resolve(`apps/web/dist/${vercel ? 'vercel' : 'pages'}/browser`);
 const html = await readFile(resolve(root, 'index.html'), 'utf8');
-assert.match(html, /<base href="\/[^"\s]*\/"|<base href="\/"/);
+assert(
+  html.includes(`<base href="${expectedBase}">`),
+  `Expected base href ${expectedBase} in Pages artifact`,
+);
 assert.match(html, /<app-root>/);
 const names = await readdir(root);
 assert(
